@@ -1,3 +1,6 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
 class DraggableMarker(object):
     lock = None  # only one can be animated at a time
 
@@ -93,3 +96,22 @@ class DraggableMarker(object):
         self.mark.figure.canvas.mpl_disconnect(self.c_id_release)
         self.mark.figure.canvas.mpl_disconnect(self.c_id_motion)
         self.mark.figure.canvas.draw()
+
+
+def dms_to_pts(dms_list):
+    """Extract the coordinates of the draggable Markers from a list."""
+    pts = np.zeros((len(dms_list), 2), np.float32)
+    for i in range(len(dms_list)):
+        pts[i] = dms_list[i].mark.get_xydata()[0]
+    return pts
+
+def add_draggable_marker(event, axis, dms):
+    print('x = ' + str(event.xdata) + '| y = ' + str(event.xdata))
+    marker, = axis.plot(event.xdata, event.ydata, 'xr', markersize=20)
+
+    # initialize draggable marker that is initialized with a Marker but
+    # will move its x,y location when dragged
+    dm = DraggableMarker(marker)
+    dm.connect()
+    dms.append(dm)
+    plt.show()

@@ -90,3 +90,4 @@ ENV/
 
 # Test Files
 composer/20160807/
+*.png
