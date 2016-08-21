@@ -33,7 +33,7 @@ class Adjuster(object):
         # TODO c_id
         c_id = fig.canvas.mpl_connect('button_press_event', _on_click)
         plt.show()
-        assert(len(dms_left) == len(dms_right))
+        assert((len(dms_left)==4) and (len(dms_right)==4))
 
         quadri_left = sort_pts(dms_to_pts(dms_left))
         quadri_right = sort_pts(dms_to_pts(dms_right))

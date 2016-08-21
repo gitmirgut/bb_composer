@@ -4,50 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-def find_closest_img(img_list, cam_left, cam_right):
-    """Find pairs of images which are close in time."""
-    cam_sorted = sorted(img_list, key=lambda img: img.time)
-    cam_diff = []
-    done = []
-    img_pred = None
-    time_diff_pred = None
-    time_diff_succ = None
-    for i in range(len(cam_sorted)):
-        img_cur = cam_sorted[i]
-        if img_cur.cam == cam_right:
-            img_pred = img_cur
-        elif img_cur.cam == cam_left:
-            if img_pred is not None:
-                time_diff_pred = img_cur.time_diff(img_pred)
-            #finding right image successor
-            for j in range(i+1, len(cam_sorted)):
-                img_succ = cam_sorted[j]
-                if img_succ.cam == cam_right:
-                    time_diff_succ = img_cur.time_diff(img_succ)
-                    break
-            if time_diff_pred is not None and time_diff_succ is not None:
-                if time_diff_pred > time_diff_succ:
-                    cam_diff.append((
-                        img_cur.path,
-                        img_succ.path,
-                        time_diff_succ))
-                else:
-                    cam_diff.append((
-                        img_cur.path,
-                        img_pred.path,
-                        time_diff_pred))
-            elif time_diff_pred is not None:
-                cam_diff.append((
-                    img_cur.path,
-                    img_pred.path,
-                    time_diff_pred))
-            elif time_diff_succ is not None:
-                cam_diff.append((
-                    img_cur.path,
-                    img_succ.path,
-                    time_diff_succ))
-    return sorted(cam_diff, key=lambda time: time[2])
-
 
 def rotate_image(img, angle):
     """Rotate img around center point by given angle.
@@ -118,13 +74,13 @@ def add_alpha_channel(img):
     return img
 
 
-def rectify_img(img, IntrinsicMatrix, Distortion_Coeff_matlab):
+def rectify_img(img, IntrinsicMatrix, distortion_coeff):
     """Take an image and undistort it."""
     # TODO check size, cmp matl
     h, w = img.shape[:2]
     newCameraMatrix_m, validPixRoi_m = cv2.getOptimalNewCameraMatrix(
-        IntrinsicMatrix, Distortion_Coeff_matlab, (w, h), 1, (w, h), 0)
+        IntrinsicMatrix, distortion_coeff, (w, h), 1, (w, h), 0)
 
     img_rectified = cv2.undistort(
-        img, IntrinsicMatrix, Distortion_Coeff_matlab, None, newCameraMatrix_m)
+        img, IntrinsicMatrix, distortion_coeff, None, newCameraMatrix_m)
     return img_rectified

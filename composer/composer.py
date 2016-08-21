@@ -16,14 +16,30 @@ class Composer(object):
         self.left_trans = None
         self.right_trans = None
 
+    def __repr__(self):
+        return('{}(\nintrinsic=\n{},\ndist_coeff\t= {},\nleft_rot_angle\t= {},\n'
+            'right_rot_angle\t= {},\nleft_trans =\n{},\nright_trans =\n{}\n)'
+            .format(self.__class__.__name__,
+                self.intrinsic_matrix,
+                self.distortion_coeff,
+                self.left_rot_angle,
+                self.right_rot_angle,
+                self.left_trans,
+                self.right_trans))
+    #
+    # def __str__(self):
+    #     return ('intrinsic_matrix =\n{}\n\n'
+    #             'distortion_coeff =\n{}\n\n'
+    #             'left_trans =\n{}\n\n'
+    #             'right_trans =\n{}\n\n'
+    #             .format(self.intrinsic_matrix, self.distortion_coeff, self.left_trans, self.right_trans))
+
+
+
     def set_camera_params(self, camera_params):
         """Set the camera intrinsic and extrinsic parameters."""
         self.intrinsic_matrix = camera_params['intrinsic_matrix']
         self.distortion_coeff = camera_params['distortion_coeff']
-        print('intr')
-        print(self.intrinsic_matrix)
-        print('dist')
-        print(self.distortion_coeff)
 
     def compose(self, left_img, right_img):
         """Compose both images to panorama."""
@@ -96,15 +112,18 @@ class Composer(object):
     #      ] = self.right[:total_size[1], int(self.hor_l + t[0]):total_size[0]]
         return result_right
 
+    def map_coordinate(self, pt):
+
+
 if __name__ == "__main__":
     composer = Composer()
     img_left_org = cv2.imread(
         './20160807/Cam_01/Cam_0_20161507130847_631282517.jpg')
     img_right_org = cv2.imread(
         './20160807/Cam_01/Cam_1_20161507130847_631282517.jpg')
-    print(img_left_org.shape)
     camera_params_path = 'camera_params_matlab.npz'
     camera_params = np.load(camera_params_path)
     composer.set_camera_params(camera_params)
+    print(composer)
     test = composer.compose(img_left_org, img_right_org)
     cv2.imwrite("result.png", test)
