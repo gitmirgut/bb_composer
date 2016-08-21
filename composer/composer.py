@@ -117,19 +117,24 @@ class Composer(object):
     #      ] = self.right[:total_size[1], int(self.hor_l + t[0]):total_size[0]]
         return result_right
 
-    def map_coordinate(self, pt):
-        pass
-
+    def map_coordinates(self, pts, cam_side=None):
+        pts = imgtools.rectify_pts(pts, self.intrinsic_matrix, self.distortion_coeff)
+        return(pts)
 
 if __name__ == "__main__":
     composer = Composer()
+    camera_params_path = 'camera_params_matlab.npz'
+    camera_params = np.load(camera_params_path)
+    composer.set_camera_params(camera_params)
+    test = np.zeros((10,1,2), dtype=np.float32)
+    # test_out = imgtools.rectify_pts(test, composer.intrinsic_matrix, composer.distortion_coeff)
+    # print(test_out[test_out < 0]) TODO problematisch wenn < 0 ?
+    print(composer.map_coordinates(test))
     img_left_org = cv2.imread(
         './20160807/Cam_01/Cam_0_20161507130847_631282517.jpg')
     img_right_org = cv2.imread(
         './20160807/Cam_01/Cam_1_20161507130847_631282517.jpg')
-    camera_params_path = 'camera_params_matlab.npz'
-    camera_params = np.load(camera_params_path)
-    composer.set_camera_params(camera_params)
+
     print(composer)
     test = composer.compose(img_left_org, img_right_org)
     cv2.imwrite("result.png", test)

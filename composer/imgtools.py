@@ -4,6 +4,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
+def rectify_img(img, IntrinsicMatrix, distortion_coeff):
+    """Take an image and undistort it."""
+    # TODO check size, cmp matl
+    h, w = img.shape[:2]
+    print(str(w) + ' ' + str(h))
+    newCameraMatrix_m, validPixRoi_m = cv2.getOptimalNewCameraMatrix(
+        IntrinsicMatrix, distortion_coeff, (w, h), 1, (w, h), 0)
+
+    img_rectified = cv2.undistort(
+        img, IntrinsicMatrix, distortion_coeff, None, newCameraMatrix_m)
+    return img_rectified
+
+def rectify_pts(pts, IntrinsicMatrix, distortion_coeff, image_size=(4000,3000)):
+    newCameraMatrix_m, validPixRoi_m = cv2.getOptimalNewCameraMatrix(
+        IntrinsicMatrix, distortion_coeff, image_size, 1, image_size, 0)
+    return cv2.undistortPoints(pts, newCameraMatrix_m, distortion_coeff)
+
 
 def rotate_image(img, angle):
     """Rotate img around center point by given angle.
@@ -72,15 +89,3 @@ def add_alpha_channel(img):
     alpha_channel = np.ones((img.shape[:2]), np.uint8)*255
     img = cv2.merge((img, alpha_channel))
     return img
-
-
-def rectify_img(img, IntrinsicMatrix, distortion_coeff):
-    """Take an image and undistort it."""
-    # TODO check size, cmp matl
-    h, w = img.shape[:2]
-    newCameraMatrix_m, validPixRoi_m = cv2.getOptimalNewCameraMatrix(
-        IntrinsicMatrix, distortion_coeff, (w, h), 1, (w, h), 0)
-
-    img_rectified = cv2.undistort(
-        img, IntrinsicMatrix, distortion_coeff, None, newCameraMatrix_m)
-    return img_rectified
