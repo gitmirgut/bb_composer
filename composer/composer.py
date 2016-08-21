@@ -20,6 +20,10 @@ class Composer(object):
         """Set the camera intrinsic and extrinsic parameters."""
         self.intrinsic_matrix = camera_params['intrinsic_matrix']
         self.distortion_coeff = camera_params['distortion_coeff']
+        print('intr')
+        print(self.intrinsic_matrix)
+        print('dist')
+        print(self.distortion_coeff)
 
     def compose(self, left_img, right_img):
         """Compose both images to panorama."""

@@ -3,54 +3,6 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import re
-
-
-class Image_info(object):
-    """Describes an image by his path, camera and timestamp."""
-
-    def __init__(self, path):
-        """Create an image instance."""
-        name = os.path.basename(path)
-        cam, time = get_cam_n_time(name)
-        self.path = path
-        self.cam = cam
-        self.time = time
-
-    def __repr__(self):
-        """Compute 'official' string reprentation."""
-        return repr((self.path, self.cam, self.time))
-
-    def time_diff(self, image):
-        """Compute the time difference."""
-        return abs(self.time - image.time)
-
-
-def get_cam_n_time(filename):
-    """Parse the cam and the time of the video from the filename."""
-    split = re.split('_{1,2}|\.', filename, 4)
-    cam = int(split[1])
-    time = int(split[2]+split[3])
-    return cam, time
-
-
-def display(img, title='image', matplotlib=False):
-    """Display images with opencv func or with the help of the matplotlib."""
-    if matplotlib:
-        fig = plt.figure(figsize=(20, 20))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        plt.imshow(img)
-        plt.title(title)
-        plt.show()
-        plt.close(fig)
-    else:
-        height, width = img.shape[:2]
-        height_s = 1000
-        width_s = int(width * height_s / height)
-        img_s = cv2.resize(img, (width_s, height_s))
-        cv2.imshow('im', img_s)
-        cv2.waitKey(100)
-
 
 def find_closest_img(img_list, cam_left, cam_right):
     """Find pairs of images which are close in time."""
@@ -160,37 +112,10 @@ def rotate_image(img, angle):
 
 def add_alpha_channel(img):
     '''add alpha channel to image'''
+    # TODO gesamte fkt ersetztbar durch cv2.cvtColor() fkt
     alpha_channel = np.ones((img.shape[:2]), np.uint8)*255
     img = cv2.merge((img, alpha_channel))
     return img
-
-
-def warp_image(image, homography):
-    '''warps and translate the image, so that it will show the whole image'''
-    height, width = image.shape[:2]
-    corners = np.float32([
-        [0, 0],
-        [0, height],
-        [width, height],
-        [width, 0]
-    ]).reshape(-1, 1, 2)
-    # calculate the result image size/dimension
-    corners_transformed = cv2.perspectiveTransform(corners, homography)
-    [xmin, ymin] = np.int32(corners_transformed.min(axis=0).ravel() - 0.5)
-    [xmax, ymax] = np.int32(corners_transformed.max(axis=0).ravel() + 0.5)
-    t = [-xmin, -ymin]
-    # calculate translation matrix to show whole image after warping
-    Ht = np.array([[1, 0, t[0]], [0, 1, t[1]], [0, 0, 1]])
-    result = cv2.warpPerspective(
-        image, Ht.dot(homography), (xmax-xmin, ymax-ymin))
-    return result
-
-
-def euclidean_distance(x0, y0, x1, y1):
-    '''calculate the euclidean_distance between pt1=(x0,y0) and pt2=(x1,y1)'''
-    x_dist = x0 - x1
-    y_dist = y0 - y1
-    return np.sqrt(np.power(x_dist, 2)+np.power(y_dist, 2))
 
 
 def rectify_img(img, IntrinsicMatrix, Distortion_Coeff_matlab):
