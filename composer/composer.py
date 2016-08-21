@@ -43,30 +43,35 @@ class Composer(object):
 
     def compose(self, left_img, right_img):
         """Compose both images to panorama."""
-        self.estimateTransform(left_img, right_img)
+        left_img,right_img = self.estimateTransform(left_img, right_img)
+        print(self)
+        self.left_img, self.right_img = left_img,right_img
         return self.composePanorama()
 
     def estimateTransform(self, left_img, right_img):
         """Determine the Transformation matrix for both images."""
         # estimates the image transformation of the left and right image
-        self.left_img = left_img
-        self.right_img = right_img
-        self._rectify_images()
-        self._rotate_images()
+        # self.left_img = left_img
+        # self.right_img = right_img
+        left_img,right_img = self._rectify_images(left_img,right_img)
+        left_img,right_img = self._rotate_images(left_img, right_img)
 
-        adj = Adjuster(self.left_img, self.right_img)
+        adj = Adjuster(left_img, right_img)
         self.left_trans, self.right_trans, self.hor_l = adj.adjust()
+        return left_img,right_img
 
-    def _rectify_images(self):
+    def _rectify_images(self, left_img,right_img):
         """Undistort the images by the give camera parameters"""
-        self.left_img = imgtools.rectify_img(
-            self.left_img, self.intrinsic_matrix, self.distortion_coeff)
-        self.right_img = imgtools.rectify_img(
-            self.right_img, self.intrinsic_matrix, self.distortion_coeff)
+        left_img = imgtools.rectify_img(
+            left_img, self.intrinsic_matrix, self.distortion_coeff)
+        right_img = imgtools.rectify_img(
+            right_img, self.intrinsic_matrix, self.distortion_coeff)
+        return left_img,right_img
 
-    def _rotate_images(self):
-        self.left_img = imgtools.rotate_image(self.left_img, self.left_rot_angle)
-        self.right_img = imgtools.rotate_image(self.right_img, self.right_rot_angle)
+    def _rotate_images(self, left_img,right_img):
+        left_img = imgtools.rotate_image(left_img, self.left_rot_angle)
+        right_img = imgtools.rotate_image(right_img, self.right_rot_angle)
+        return left_img,right_img
 
     def composePanorama(self):
         # get origina width and height of images
@@ -113,6 +118,7 @@ class Composer(object):
         return result_right
 
     def map_coordinate(self, pt):
+        pass
 
 
 if __name__ == "__main__":
