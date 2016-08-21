@@ -15,21 +15,21 @@ class Adjuster(object):
 
         def _on_click(event):
             if event.button == 1 and event.dblclick:
-                if event.inaxes == ax_left and self.count_dms_left < 4:
+                if event.inaxes == ax_left and len(dms_left) < 4:
                     print(self.count_dms_left)
                     self.count_dms_left += 1
-                    add_draggable_marker(event, ax_left, dms_left)
-                elif event.inaxes == ax_right and self.count_dms_left < 4:
+                    add_draggable_marker(event, ax_left, dms_left, self.left_img)
+                elif event.inaxes == ax_right and len(dms_right) < 4:
                     self.count_dms_right += 1
-                    add_draggable_marker(event, ax_right, dms_right)
+                    add_draggable_marker(event, ax_right, dms_right, self.right_img)
 
         fig, (ax_left, ax_right) = plt.subplots(nrows=1, ncols=2, tight_layout=True)
         plt.setp(ax_right.get_yticklabels(), visible=False)
         # TODO remove alpha channel when exist for display
         ax_left.imshow(self.left_img)
         ax_right.imshow(self.right_img)
-        dms_left = []
-        dms_right = []
+        dms_left = set()
+        dms_right = set()
         # TODO c_id
         c_id = fig.canvas.mpl_connect('button_press_event', _on_click)
         plt.show()
