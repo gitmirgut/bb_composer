@@ -26,15 +26,6 @@ class Composer(object):
                 self.right_rot_angle,
                 self.left_trans,
                 self.right_trans))
-    #
-    # def __str__(self):
-    #     return ('intrinsic_matrix =\n{}\n\n'
-    #             'distortion_coeff =\n{}\n\n'
-    #             'left_trans =\n{}\n\n'
-    #             'right_trans =\n{}\n\n'
-    #             .format(self.intrinsic_matrix, self.distortion_coeff, self.left_trans, self.right_trans))
-
-
 
     def set_camera_params(self, camera_params):
         """Set the camera intrinsic and extrinsic parameters."""
@@ -76,8 +67,6 @@ class Composer(object):
     def composePanorama(self):
         # get origina width and height of images
         left_h, left_w = self.left_img.shape[:2]
-        print("left_h = " + str(left_h))
-        print(left_w)
         right_h, right_w = self.right_img.shape[:2]
         left_corners = np.float32([
             [0,         0],
@@ -113,8 +102,6 @@ class Composer(object):
         # unify both layers
         result_right[:total_size[1], :int(self.hor_l + t[0])
             ] = self.left_img[:total_size[1], :int(self.hor_l + t[0])]
-    # self.left_img[:total_size[1], int(self.hor_l + t[0]):total_size[0]
-    #      ] = self.right[:total_size[1], int(self.hor_l + t[0]):total_size[0]]
         return result_right
 
     def map_coordinates(self, pts, cam_side=None):
@@ -122,19 +109,27 @@ class Composer(object):
         return(pts)
 
 if __name__ == "__main__":
-    composer = Composer()
+    c = Composer()
     camera_params_path = 'camera_params_matlab.npz'
     camera_params = np.load(camera_params_path)
-    composer.set_camera_params(camera_params)
+    c.set_camera_params(camera_params)
     test = np.zeros((10,1,2), dtype=np.float32)
-    # test_out = imgtools.rectify_pts(test, composer.intrinsic_matrix, composer.distortion_coeff)
+    # test_out = imgtools.rectify_pts(test, c.intrinsic_matrix, c.distortion_coeff)
     # print(test_out[test_out < 0]) TODO problematisch wenn < 0 ?
-    print(composer.map_coordinates(test))
+    print(c.map_coordinates(test))
     img_left_org = cv2.imread(
         './20160807/Cam_01/Cam_0_20161507130847_631282517.jpg')
     img_right_org = cv2.imread(
         './20160807/Cam_01/Cam_1_20161507130847_631282517.jpg')
+    test = c.compose(img_left_org, img_right_org)
 
-    print(composer)
-    test = composer.compose(img_left_org, img_right_org)
     cv2.imwrite("result.png", test)
+    np.savez('test.npz',
+        left_rot_angle=c.left_rot_angle,
+        right_rot_angle=c.right_rot_angle,
+        intrinsic_matrix=c.intrinsic_matrix,
+        distortion_coeff=c.distortion_coeff,
+        left_trans = c.left_trans,
+        right_trans = c.right_trans)
+    npzfile = np.load('test.npz')
+    print(npzfile.files)

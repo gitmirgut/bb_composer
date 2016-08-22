@@ -34,8 +34,10 @@ class Adjuster(object):
         c_id = fig.canvas.mpl_connect('button_press_event', _on_click)
         plt.show()
         assert((len(dms_left)==4) and (len(dms_right)==4))
-
+        # img = np.copy(self.left_img)
         quadri_left = sort_pts(dms_to_pts(dms_left))
+        # cv2.drawMarker(img, tuple(quadri_left[0]), (255,0,0))
+        # cv2.imwrite("test.png", img)
         quadri_right = sort_pts(dms_to_pts(dms_right))
 
         """
@@ -55,11 +57,13 @@ class Adjuster(object):
         um_l = quadri_left[1]
         dl_l = quadri_left[2]
         dm_l = quadri_left[3]
+        print("quadri_left " + str(quadri_left))
 
         ul_r = quadri_right[0]
         um_r = quadri_right[1]
         dl_r = quadri_right[2]
         dm_r = quadri_right[3]
+        print("quadri_left " + str(quadri_right))
 
         # get the euclidean distances between the corners of the quadrilaterals
         u_l = np.linalg.norm(ul_l - um_l)
@@ -70,6 +74,15 @@ class Adjuster(object):
         d_r = np.linalg.norm(dl_r - dm_r)
         l_r = np.linalg.norm(ul_r - dl_r)
         r_r = np.linalg.norm(um_r - dm_r)
+
+        print("u_l = " + str(u_l))
+        print("d_l = " + str(d_l))
+        print("l_l = " + str(l_l))
+        print("r_l = " + str(r_l))
+        print("u_r = " + str(u_r))
+        print("d_r = " + str(d_r))
+        print("l_r = " + str(l_r))
+        print("r_r = " + str(r_r))
 
         hor_l = max(u_l, d_l)
         hor_r = max(u_r, d_r)
@@ -96,6 +109,7 @@ class Adjuster(object):
         rect_dest[3] = hor_l + hor_r, vert
         rect_dest[4] = hor_l, vert
         rect_dest[5] = 0, vert
+        print(rect_dest)
 
         rect_left = np.array([rect_dest[0],rect_dest[1],rect_dest[4],rect_dest[5]])
         rect_right = np.array([rect_dest[1],rect_dest[2],rect_dest[3],rect_dest[4]])
