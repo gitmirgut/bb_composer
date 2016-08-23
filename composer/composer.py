@@ -19,6 +19,7 @@ class Composer(object):
         self.right_trans = None
 
     def create_from_file(file):
+        '''Create new Composer with data loaded from file'''
         c = Composer()
         with np.load(file) as data:
             c.left_rot_angle = data['left_rot_angle']
@@ -136,7 +137,7 @@ if __name__ == "__main__":
     # camera_params = np.load(camera_params_path)
     # c.set_camera_params(camera_params)
     # test = np.zeros((10, 1, 2), dtype=np.float32)
-    # # test_out = imgtools.rectify_pts(test, c.intrinsic_matrix, c.distortion_coeff)
+    # # test_o ut = imgtools.rectify_pts(test, c.intrinsic_matrix, c.distortion_coeff)
     # # print(test_out[test_out < 0]) TODO problematisch wenn < 0 ?
     # print(c.map_coordinates(test))
     # img_left_org = cv2.imread(
@@ -156,11 +157,15 @@ if __name__ == "__main__":
     #          right_trans=c.right_trans)
     # npzfile = np.load('composer_params.npz')
     # print(npzfile.files)
+    pts = np.array([[[1.0, 1.0]]])
+    print(type(pts))
     img_left_org = cv2.imread(
         './20160807/Cam_01/Cam_0_20161507130847_631282517.jpg')
     img_right_org = cv2.imread(
         './20160807/Cam_01/Cam_1_20161507130847_631282517.jpg')
     nc = Composer.create_from_file('composer_params.npz')
+    print(pts)
+    print(nc.map_coordinates(pts))
     print('rect')
     left_img, right_img = nc._rectify_images(img_left_org, img_right_org)
     print('rot')
