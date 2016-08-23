@@ -1,7 +1,7 @@
 import cv2
 # TODO rename imgtools to imagetools and import as imgt
-import imgtools
-from adjuster import Adjuster
+import composer.imgtools as imgtools
+from composer.adjuster import Adjuster
 import numpy as np
 
 

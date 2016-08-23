@@ -1,4 +1,4 @@
-from draggable_marker import DraggableMarker, dms_to_pts, add_draggable_marker
+from composer.draggable_marker import DraggableMarker, dms_to_pts, add_draggable_marker
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
