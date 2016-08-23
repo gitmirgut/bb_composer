@@ -113,7 +113,7 @@ class Composer(object):
         return result_right
 
     def map_coordinate(self, pt):
-
+        pass
 
 if __name__ == "__main__":
     composer = Composer()
