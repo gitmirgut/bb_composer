@@ -55,12 +55,12 @@ class Adjuster(object):
         """
         ul_l = quadri_left[0]
         um_l = quadri_left[1]
-        dl_l = quadri_left[2]
-        dm_l = quadri_left[3]
-        print("quadri_left " + str(quadri_left))
+        dm_l = quadri_left[2]
+        dl_l = quadri_left[3]
 
-        ul_r = quadri_right[0]
-        um_r = quadri_right[1]
+
+        um_r = quadri_right[0]
+        ul_r = quadri_right[1]
         dl_r = quadri_right[2]
         dm_r = quadri_right[3]
         print("quadri_left " + str(quadri_right))
