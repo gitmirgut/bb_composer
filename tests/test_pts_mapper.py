@@ -1,5 +1,5 @@
 from context import composer
-import composer.composer
+import composer.core
 import numpy as np
 import cv2
 from composer import imgtools
@@ -24,7 +24,7 @@ img_left_org = cv2.imread(
     'data/20160807/Cam_01/Cam_0_20161507130847_631282517.jpg')
 img_right_org = cv2.imread(
     'data/20160807/Cam_01/Cam_1_20161507130847_631282517.jpg')
-nc = composer.composer.Composer.create_from_file('composer_params.npz')
+nc = composer.core.Composer.create_from_file('composer_params.npz')
 
 img_left = draw_makers(img_left_org, pts_left, (255, 0, 0), cv2.MARKER_CROSS)
 img_right = draw_makers(img_right_org, pts_right, (255, 0, 0), cv2.MARKER_CROSS)

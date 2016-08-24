@@ -1,5 +1,5 @@
 from context import composer
-from composer.composer import Composer
+from composer.core import Composer
 import numpy as np
 import cv2
 

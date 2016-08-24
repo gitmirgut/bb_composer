@@ -1,5 +1,5 @@
 from context import composer
-from composer.composer import Composer
+from composer.core import Composer
 import cv2
 import numpy as np
 # import composer.imgtools

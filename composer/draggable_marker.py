@@ -2,11 +2,19 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 class DraggableMarker(object):
+    """Defines Marker which can be dragged by mouse.
+
+    The placed marker can be dragged by simple left click and can be refined
+    by pressing the button.
+    """
+
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     lock = None  # only one can be animated at a time
 
     def __init__(self, mark, img):
+        """Initialize a DraggableMarker, with the img for later refinement."""
         self.img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         self.mark = mark
         # self.mark.set_color('y')
@@ -14,7 +22,7 @@ class DraggableMarker(object):
         self.background = None
 
     def connect(self):
-        '''connect to all the events we need'''
+        """Connect to all needed Events."""
         self.c_id_press = self.mark.figure.canvas.mpl_connect(
             'button_press_event', self.on_press)
         self.c_id_release = self.mark.figure.canvas.mpl_connect(
@@ -25,9 +33,7 @@ class DraggableMarker(object):
             'key_release_event', self.on_key)
 
     def on_press(self, event):
-        """on button press we will see if the mouse is over us and store
-        some data
-        """
+        """Check on button press if mouse is over this DraggableMarker."""
         if event.inaxes != self.mark.axes:
             return
         if DraggableMarker.lock is not None:
@@ -57,7 +63,7 @@ class DraggableMarker(object):
         canvas.blit(axes.bbox)
 
     def on_motion(self, event):
-        'on motion we will move the mark if the mouse is over us'
+        """On motion the mark will move if the mouse is over this marker."""
         if DraggableMarker.lock is not self:
             return
         if event.inaxes != self.mark.axes:
@@ -80,7 +86,7 @@ class DraggableMarker(object):
         canvas.blit(axes.bbox)
 
     def on_release(self, event):
-        'on release we reset the press data'
+        """On release the press data will be reset."""
         if DraggableMarker.lock is not self:
             return
 
@@ -95,6 +101,7 @@ class DraggableMarker(object):
         self.mark.figure.canvas.draw()
 
     def on_key(self, event):
+        """Check what key ist pressed and executes corresponding function."""
         print(self.mark.axes)
         if event.inaxes != self.mark.axes:
             return
@@ -113,13 +120,8 @@ class DraggableMarker(object):
             self.mark.set_color('y')
             plt.show()
 
-
-    def on_enter(self):
-        self.mark.set_color('y')
-        self.mark.draw()
-
     def disconnect(self):
-        'disconnect all the stored connection ids'
+        """disconnect all the stored connection ids."""
         self.mark.figure.canvas.mpl_disconnect(self.c_id_press)
         self.mark.figure.canvas.mpl_disconnect(self.c_id_release)
         self.mark.figure.canvas.mpl_disconnect(self.c_id_motion)
@@ -127,14 +129,16 @@ class DraggableMarker(object):
 
 
 def dms_to_pts(dms_list):
-    dms_list = list(dms_list)
     """Extract the coordinates of the draggable Markers from a list."""
+    dms_list = list(dms_list)
     pts = np.zeros((len(dms_list), 2), np.float32)
     for i in range(len(dms_list)):
         pts[i] = dms_list[i].mark.get_xydata()[0]
     return pts
 
+
 def add_draggable_marker(event, axis, dms, img):
+    """Add a DraggableMarker to the axis and to the list dms."""
     print('x = ' + str(event.xdata) + '| y = ' + str(event.xdata))
     marker, = axis.plot(event.xdata, event.ydata, 'xr', markersize=20)
 
@@ -145,7 +149,9 @@ def add_draggable_marker(event, axis, dms, img):
     dms.add(dm)
     plt.show()
 
-def refine(img,corner):
+
+def refine(img, corner):
+    """Refine the corner location."""
     corner_new = np.ones((1, 1, 2), np.float32)
     corner_new[0][0] = corner[0][0][0], corner[0][0][1]
 

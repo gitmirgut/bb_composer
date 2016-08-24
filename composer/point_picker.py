@@ -3,7 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 
+
 class Point_Picker(object):
+    """GUI for picking points.
+    """
+
     def __init__(self, left_img, right_img):
         self.left_img = left_img
         self.right_img = right_img
@@ -14,20 +18,22 @@ class Point_Picker(object):
         """Initialise GUI to pick 4 points on each side.
 
         A matplot GUI will be initialised, where the user has to pick 4 points
-        on each side. Afterwards the PointPicker will return 2 clockwise sorted
-        list of the picked points.
+        on the left and right image. Afterwards the PointPicker will return 2
+        clockwise sorted list of the picked points.
         """
         def _on_click(event):
             if event.button == 1 and event.dblclick:
                 if event.inaxes == ax_left and len(dms_left) < 4:
-                    print(self.count_dms_left)
                     self.count_dms_left += 1
-                    add_draggable_marker(event, ax_left, dms_left, self.left_img)
+                    add_draggable_marker(
+                        event, ax_left, dms_left, self.left_img)
                 elif event.inaxes == ax_right and len(dms_right) < 4:
                     self.count_dms_right += 1
-                    add_draggable_marker(event, ax_right, dms_right, self.right_img)
+                    add_draggable_marker(
+                        event, ax_right, dms_right, self.right_img)
 
-        fig, (ax_left, ax_right) = plt.subplots(nrows=1, ncols=2, tight_layout=True)
+        fig, (ax_left, ax_right) = plt.subplots(
+            nrows=1, ncols=2, tight_layout=True)
         plt.setp(ax_right.get_yticklabels(), visible=False)
         # TODO remove alpha channel when exist for display
         ax_left.imshow(self.left_img)
@@ -37,7 +43,7 @@ class Point_Picker(object):
         # TODO c_id
         c_id = fig.canvas.mpl_connect('button_press_event', _on_click)
         plt.show()
-        assert((len(dms_left)==4) and (len(dms_right)==4))
+        assert((len(dms_left) == 4) and (len(dms_right) == 4))
         quadri_left = sort_pts(dms_to_pts(dms_left))
         quadri_right = sort_pts(dms_to_pts(dms_right))
 
@@ -63,12 +69,10 @@ def find_rect(quadri_left, quadri_right):
     dm_l = quadri_left[2]
     dl_l = quadri_left[3]
 
-
     um_r = quadri_right[0]
     ul_r = quadri_right[1]
     dl_r = quadri_right[2]
     dm_r = quadri_right[3]
-
 
     # get the euclidean distances between the corners of the quadrilaterals
     u_l = np.linalg.norm(ul_l - um_l)
@@ -80,13 +84,9 @@ def find_rect(quadri_left, quadri_right):
     l_r = np.linalg.norm(ul_r - dl_r)
     r_r = np.linalg.norm(um_r - dm_r)
 
-
     hor_l = max(u_l, d_l)
     hor_r = max(u_r, d_r)
     vert = max(l_l, r_l, l_r, r_r)
-    print(hor_l)
-    print(hor_r)
-    print(vert)
 
     """
     Declare the dimension of the destination rectangle.
@@ -106,24 +106,44 @@ def find_rect(quadri_left, quadri_right):
     rect_dest[3] = hor_l + hor_r, vert
     rect_dest[4] = hor_l, vert
     rect_dest[5] = 0, vert
-    print(rect_dest)
+    return rect_dest, hor_l
 
-    rect_left = np.array([rect_dest[0],rect_dest[1],rect_dest[4],rect_dest[5]])
-    rect_right = np.array([rect_dest[1],rect_dest[2],rect_dest[3],rect_dest[4]])
+
+def find_homographys(quadri_left, quadri_right, rect_dest):
+    """Determine the homography between (quadri_left, quadri_right) & rect_dest.
+
+    The function will map the the quadrilaterals quadri_left and quadri_right
+    to the rectangle rect_dest and return the homography.
+    """
+    rect_left = np.array(
+        [rect_dest[0], rect_dest[1], rect_dest[4], rect_dest[5]])
+    rect_right = np.array(
+        [rect_dest[1], rect_dest[2], rect_dest[3], rect_dest[4]])
     left_h, m = cv2.findHomography(quadri_left, rect_left)
     right_h, m = cv2.findHomography(quadri_right, rect_right)
-    return left_h, right_h, hor_l
+    return left_h, right_h
 
 def sort_pts(pts):
+    r"""Sort points as convex quadrilateral.
+
+    Sort points in clockwise order, so that they form a convex quadrilateral.
+
+    pts:                sort_pts:
+         x   x                      A---B
+                      --->         /     \
+       x       x                  D-------C
+
+    """
     sort_pts = np.zeros((len(pts), 2), np.float32)
     for i in range(len(pts)):
         sort_pts[i] = pts[argsort_pts(pts)[i]]
     return sort_pts
 
-def argsort_pts(points):
-    """order points as convex quadrilateral.
 
-    Return the indices that would order the points,
+def argsort_pts(points):
+    r"""Sort points as convex quadrilateral.
+
+    Returns the indices that will sort the points in clockwise order,
     so that they form a convex quadrilateral.
 
     points:                quadri:

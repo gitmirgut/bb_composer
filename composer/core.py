@@ -51,23 +51,18 @@ class Composer(object):
     def compose(self, left_img, right_img):
         """Compose both images to panorama."""
         left_img, right_img = self.estimateTransform(left_img, right_img)
-        print(self)
-        # self.left_img, self.right_img = left_img, right_img
         return self.composePanorama(left_img, right_img)
 
     def estimateTransform(self, left_img, right_img):
         """Determine the Transformation matrix for both images."""
         # estimates the image transformation of the left and right image
-        # self.left_img = left_img
-        # self.right_img = right_img
         left_img, right_img = self._rectify_images(left_img, right_img)
         left_img, right_img = self._rotate_images(left_img, right_img)
 
         adj = Point_Picker(left_img, right_img)
-        # self.left_trans, self.right_trans, self.hor_l = adj.pick()
-        # self.left_trans, self.right_trans = adj.pick()
         quadri_left, quadri_right = adj.pick()
-        self.left_trans, self.right_trans, self.hor_l = point_picker.find_rect(quadri_left, quadri_right)
+        rect_dest, self.hor_l = point_picker.find_rect(quadri_left, quadri_right)
+        self.left_trans, self.right_trans = point_picker.find_homographys(quadri_left, quadri_right, rect_dest)
         return left_img, right_img
 
     def _rectify_images(self, left_img, right_img):

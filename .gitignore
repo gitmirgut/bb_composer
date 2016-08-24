@@ -89,6 +89,6 @@ ENV/
 .ropeproject
 
 # Test Files
-test/data/20160807
+tests/data/20160807
 *.png
 *.jpg
