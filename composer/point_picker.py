@@ -43,70 +43,76 @@ class Point_Picker(object):
 
         return quadri_left, quadri_right
 
-    def find_rect(quadri_left, quadri_right):
-        """
-        The following steps will determine the dimension, of the rectangle/s to
-        which the quadrilaterals will be mapped to.
-        """
 
-        """
-        Rename corners for better orientation.
-        ul_l----um_l / um_r----ul_r
-         |         |    |        |
-         |  left   |    | right  |
-         |         |    |        |
-        dl_l----dm_l / dm_r----dl_r
-        """
-        ul_l = quadri_left[0]
-        um_l = quadri_left[1]
-        dm_l = quadri_left[2]
-        dl_l = quadri_left[3]
+def find_rect(quadri_left, quadri_right):
+    """
+    The following steps will determine the dimension, of the rectangle/s to
+    which the quadrilaterals will be mapped to.
+    """
+
+    """
+    Rename corners for better orientation.
+    ul_l----um_l / um_r----ul_r
+     |         |    |        |
+     |  left   |    | right  |
+     |         |    |        |
+    dl_l----dm_l / dm_r----dl_r
+    """
+    ul_l = quadri_left[0]
+    um_l = quadri_left[1]
+    dm_l = quadri_left[2]
+    dl_l = quadri_left[3]
 
 
-        um_r = quadri_right[0]
-        ul_r = quadri_right[1]
-        dl_r = quadri_right[2]
-        dm_r = quadri_right[3]
+    um_r = quadri_right[0]
+    ul_r = quadri_right[1]
+    dl_r = quadri_right[2]
+    dm_r = quadri_right[3]
 
-        # get the euclidean distances between the corners of the quadrilaterals
-        u_l = np.linalg.norm(ul_l - um_l)
-        d_l = np.linalg.norm(dl_l - dm_l)
-        l_l = np.linalg.norm(ul_l - dl_l)
-        r_l = np.linalg.norm(um_l - dm_l)
-        u_r = np.linalg.norm(ul_r - um_r)
-        d_r = np.linalg.norm(dl_r - dm_r)
-        l_r = np.linalg.norm(ul_r - dl_r)
-        r_r = np.linalg.norm(um_r - dm_r)
 
-        hor_l = max(u_l, d_l)
-        hor_r = max(u_r, d_r)
-        vert = max(l_l, r_l, l_r, r_r)
+    # get the euclidean distances between the corners of the quadrilaterals
+    u_l = np.linalg.norm(ul_l - um_l)
+    d_l = np.linalg.norm(dl_l - dm_l)
+    l_l = np.linalg.norm(ul_l - dl_l)
+    r_l = np.linalg.norm(um_l - dm_l)
+    u_r = np.linalg.norm(ul_r - um_r)
+    d_r = np.linalg.norm(dl_r - dm_r)
+    l_r = np.linalg.norm(ul_r - dl_r)
+    r_r = np.linalg.norm(um_r - dm_r)
 
-        """
-        Declare the dimension of the destination rectangle.
 
-        rect_dest:
-        0 ----  1 ----- 2
-        |       |       |
-        | left  | right |
-        |       |       |
-        5 ----  4 ----- 3
-        """
+    hor_l = max(u_l, d_l)
+    hor_r = max(u_r, d_r)
+    vert = max(l_l, r_l, l_r, r_r)
+    print(hor_l)
+    print(hor_r)
+    print(vert)
 
-        rect_dest = np.zeros((6, 2), np.float32)
-        rect_dest[0] = 0, 0
-        rect_dest[1] = hor_l, 0
-        rect_dest[2] = hor_l + hor_r, 0
-        rect_dest[3] = hor_l + hor_r, vert
-        rect_dest[4] = hor_l, vert
-        rect_dest[5] = 0, vert
-        print(rect_dest)
+    """
+    Declare the dimension of the destination rectangle.
 
-        rect_left = np.array([rect_dest[0],rect_dest[1],rect_dest[4],rect_dest[5]])
-        rect_right = np.array([rect_dest[1],rect_dest[2],rect_dest[3],rect_dest[4]])
-        left_h, m = cv2.findHomography(quadri_left, rect_left)
-        right_h, m = cv2.findHomography(quadri_right, rect_right)
-        return left_h, right_h, hor_l
+    rect_dest:
+    0 ----  1 ----- 2
+    |       |       |
+    | left  | right |
+    |       |       |
+    5 ----  4 ----- 3
+    """
+
+    rect_dest = np.zeros((6, 2), np.float32)
+    rect_dest[0] = 0, 0
+    rect_dest[1] = hor_l, 0
+    rect_dest[2] = hor_l + hor_r, 0
+    rect_dest[3] = hor_l + hor_r, vert
+    rect_dest[4] = hor_l, vert
+    rect_dest[5] = 0, vert
+    print(rect_dest)
+
+    rect_left = np.array([rect_dest[0],rect_dest[1],rect_dest[4],rect_dest[5]])
+    rect_right = np.array([rect_dest[1],rect_dest[2],rect_dest[3],rect_dest[4]])
+    left_h, m = cv2.findHomography(quadri_left, rect_left)
+    right_h, m = cv2.findHomography(quadri_right, rect_right)
+    return left_h, right_h, hor_l
 
 def sort_pts(pts):
     sort_pts = np.zeros((len(pts), 2), np.float32)

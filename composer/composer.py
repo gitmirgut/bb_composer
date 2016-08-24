@@ -1,7 +1,8 @@
 import cv2
 # TODO rename imgtools to imagetools and import as imgt
 import composer.imgtools as imgtools
-from composer.adjuster import Adjuster
+from composer.point_picker import Point_Picker
+import composer.point_picker as point_picker
 import numpy as np
 
 
@@ -62,8 +63,11 @@ class Composer(object):
         left_img, right_img = self._rectify_images(left_img, right_img)
         left_img, right_img = self._rotate_images(left_img, right_img)
 
-        adj = Adjuster(left_img, right_img)
-        self.left_trans, self.right_trans, self.hor_l = adj.adjust()
+        adj = Point_Picker(left_img, right_img)
+        # self.left_trans, self.right_trans, self.hor_l = adj.pick()
+        # self.left_trans, self.right_trans = adj.pick()
+        quadri_left, quadri_right = adj.pick()
+        self.left_trans, self.right_trans, self.hor_l = point_picker.find_rect(quadri_left, quadri_right)
         return left_img, right_img
 
     def _rectify_images(self, left_img, right_img):
@@ -122,11 +126,13 @@ class Composer(object):
         trans_m = np.array(
             [[1, 0, t[0]], [0, 1, t[1]], [0, 0, 1]])  # translate
         total_size = (xmax - xmin, ymax - ymin)
+
         result_right = cv2.warpPerspective(
             right_img, trans_m.dot(self.right_trans), total_size)
         left_img = cv2.warpPerspective(
             left_img, trans_m.dot(self.left_trans), total_size)
-
+        self.right_trans = trans_m.dot(self.right_trans)
+        self.left_trans = trans_m.dot(self.left_trans)
         # unify both layers
         result_right[:total_size[1], :int(self.hor_l + t[0])
                      ] = left_img[:total_size[1], :int(self.hor_l + t[0])]

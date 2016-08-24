@@ -18,6 +18,7 @@ pts_right_org = np.array([[[428, 80], [429, 1312], [419, 2752], [3729, 99], [
                      3708, 1413], [3683, 2704], [2043, 1780], [2494, 206]]]).astype(np.float64)
 pts_left = np.copy(pts_left_org)
 pts_right =  np.copy(pts_right_org)
+print(pts_left.shape)
 
 img_left_org = cv2.imread(
     'data/20160807/Cam_01/Cam_0_20161507130847_631282517.jpg')
@@ -59,4 +60,18 @@ cv2.imwrite('3_1.jpg', img_right_d)
 cv2.imwrite('3_p0.jpg', img_left)
 cv2.imwrite('3_p1.jpg', img_right)
 print(pts_left)
-print(nc.map_coordinates(pts_left_org))
+print(nc.left_rot_mat)
+# print(nc.map_coordinates(pts_left_org))
+
+result = nc.composePanorama(img_left, img_right)
+cv2.imwrite('result_panormat.jpg', result)
+pts_left = cv2.perspectiveTransform(pts_left, nc.left_trans)
+pts_right = cv2.perspectiveTransform(pts_right, nc.right_trans)
+print(pts_left)
+print(nc.left_trans)
+
+# pts_left = cv2.perspectiveTransform(pts_left, nc.left_trans)
+# pts_right = cv2.perspectiveTransformsform(pts_right, nc.right_trans)
+result_m = draw_makers(result, pts_left)
+result_m = draw_makers(result_m, pts_right)
+cv2.imwrite('result_panormat_m.jpg', result_m)
