@@ -8,9 +8,9 @@ import numpy as np
 pts = np.array([[[1.0, 1.0]]])
 print(type(pts))
 img_left_org = cv2.imread(
-    './20160807/Cam_01/Cam_0_20161507130847_631282517.jpg')
+    'data/20160807/Cam_01/Cam_0_20161507130847_631282517.jpg')
 img_right_org = cv2.imread(
-    './20160807/Cam_01/Cam_1_20161507130847_631282517.jpg')
+    'data/20160807/Cam_01/Cam_1_20161507130847_631282517.jpg')
 nc = Composer.create_from_file('composer_params.npz')
 print(pts)
 print(nc.map_coordinates(pts))

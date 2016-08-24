@@ -47,7 +47,6 @@ class Composer(object):
         self.intrinsic_matrix = camera_params['intrinsic_matrix']
         self.distortion_coeff = camera_params['distortion_coeff']
 
-
     def compose(self, left_img, right_img):
         """Compose both images to panorama."""
         left_img, right_img = self.estimateTransform(left_img, right_img)
@@ -76,9 +75,17 @@ class Composer(object):
         return left_img, right_img
 
     def _rotate_images(self, left_img, right_img):
-        left_img = imgtools.rotate_image(left_img, self.left_rot_angle)
-        right_img = imgtools.rotate_image(right_img, self.right_rot_angle)
+        left_img, self.left_rot_mat = imgtools.rotate_image(
+            left_img, self.left_rot_angle)
+        right_img,  self.right_rot_mat = imgtools.rotate_image(
+            right_img, self.right_rot_angle)
         return left_img, right_img
+
+    def _rotate_points(self, points, left=True):
+        if left:
+            return cv2.transform(points, self.left_rot_mat)
+        else:
+            return cv2.transform(points, self.right_rot_mat)
 
     def composePanorama(self, left_img, right_img):
         # get origina width and height of images
@@ -125,52 +132,8 @@ class Composer(object):
                      ] = left_img[:total_size[1], :int(self.hor_l + t[0])]
         return result_right
 
-    def map_coordinates(self, pts, cam_side=None):
+    def map_coordinates(self, pts, left=True):
         pts = imgtools.rectify_pts(
             pts, self.intrinsic_matrix, self.distortion_coeff)
+        pts = self._rotate_points(pts, left)
         return(pts)
-
-if __name__ == "__main__":
-
-    # c = Composer()
-    # camera_params_path = 'camera_params_matlab.npz'
-    # camera_params = np.load(camera_params_path)
-    # c.set_camera_params(camera_params)
-    # test = np.zeros((10, 1, 2), dtype=np.float32)
-    # # test_o ut = imgtools.rectify_pts(test, c.intrinsic_matrix, c.distortion_coeff)
-    # # print(test_out[test_out < 0]) TODO problematisch wenn < 0 ?
-    # print(c.map_coordinates(test))
-    # img_left_org = cv2.imread(
-    #     './20160807/Cam_01/Cam_0_20161507130847_631282517.jpg')
-    # img_right_org = cv2.imread(
-    #     './20160807/Cam_01/Cam_1_20161507130847_631282517.jpg')
-    # test = c.compose(img_left_org, img_right_org)
-    #
-    # cv2.imwrite("result.png", test)
-    # np.savez('composer_params.npz',
-    #          left_rot_angle=c.left_rot_angle,
-    #          right_rot_angle=c.right_rot_angle,
-    #          intrinsic_matrix=c.intrinsic_matrix,
-    #          distortion_coeff=c.distortion_coeff,
-    #          hor_l = c.hor_l,
-    #          left_trans=c.left_trans,
-    #          right_trans=c.right_trans)
-    # npzfile = np.load('composer_params.npz')
-    # print(npzfile.files)
-    pts = np.array([[[1.0, 1.0]]])
-    print(type(pts))
-    img_left_org = cv2.imread(
-        './20160807/Cam_01/Cam_0_20161507130847_631282517.jpg')
-    img_right_org = cv2.imread(
-        './20160807/Cam_01/Cam_1_20161507130847_631282517.jpg')
-    nc = Composer.create_from_file('composer_params.npz')
-    print(pts)
-    print(nc.map_coordinates(pts))
-    print('rect')
-    left_img, right_img = nc._rectify_images(img_left_org, img_right_org)
-    print('rot')
-    left_img, right_img = nc._rotate_images(left_img, right_img)
-    print('compose')
-    result = nc.composePanorama(left_img, right_img)
-    cv2.imwrite("loaded_result.png", result)
-    print(nc)

@@ -19,7 +19,7 @@ def rectify_img(img, IntrinsicMatrix, distortion_coeff):
 def rectify_pts(pts, IntrinsicMatrix, distortion_coeff, image_size=(4000,3000)):
     newCameraMatrix_m, validPixRoi_m = cv2.getOptimalNewCameraMatrix(
         IntrinsicMatrix, distortion_coeff, image_size, 1, image_size, 0)
-    return cv2.undistortPoints(pts, newCameraMatrix_m, distortion_coeff)
+    return cv2.undistortPoints(pts, IntrinsicMatrix, distortion_coeff, None, newCameraMatrix_m)
 
 
 def rotate_image(img, angle):
@@ -80,7 +80,7 @@ def rotate_image(img, angle):
         flags=cv2.INTER_LINEAR
     )
 
-    return retval
+    return retval, affine_mat
 
 
 def add_alpha_channel(img):
