@@ -8,7 +8,6 @@ def rectify_img(img, IntrinsicMatrix, distortion_coeff):
     """Take an image and undistort it."""
     # TODO check size, cmp matl
     h, w = img.shape[:2]
-    print(str(w) + ' ' + str(h))
     newCameraMatrix_m, validPixRoi_m = cv2.getOptimalNewCameraMatrix(
         IntrinsicMatrix, distortion_coeff, (w, h), 1, (w, h), 0)
 

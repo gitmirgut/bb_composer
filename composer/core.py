@@ -1,9 +1,12 @@
-import cv2
 # TODO rename imgtools to imagetools and import as imgt
 import composer.imgtools as imgtools
-from composer.point_picker import Point_Picker
 import composer.point_picker as point_picker
+from composer.point_picker import Point_Picker
+import cv2
+from logging import getLogger
 import numpy as np
+
+log = getLogger(__name__)
 
 
 class Composer(object):
@@ -21,6 +24,7 @@ class Composer(object):
 
     def create_from_file(file):
         '''Create new Composer with data loaded from file'''
+        # TODO error wenn file nicht gefunden
         c = Composer()
         with np.load(file) as data:
             c.left_rot_angle = data['left_rot_angle']
@@ -30,6 +34,8 @@ class Composer(object):
             c.left_trans = data['left_trans']
             c.right_trans = data['right_trans']
             c.hor_l = data['hor_l']
+        log.info('New Composer created from file {}'.format(file))
+        log.debug(c)
         return c
 
     def __repr__(self):
@@ -47,6 +53,7 @@ class Composer(object):
         """Set the camera intrinsic and extrinsic parameters."""
         self.intrinsic_matrix = camera_params['intrinsic_matrix']
         self.distortion_coeff = camera_params['distortion_coeff']
+        log.info('Camera parameters loaded.')
 
     def compose(self, left_img, right_img):
         """Compose both images to panorama."""
@@ -57,11 +64,17 @@ class Composer(object):
         """Determine the Transformation matrix for both images."""
         # estimates the image transformation of the left and right image
         left_img, right_img = self._rectify_images(left_img, right_img)
+        log.info('Images were rectified.')
         left_img, right_img = self._rotate_images(left_img, right_img)
+        log.info('Images were rotated.')
 
+        log.info('Point Picker will be initialised.')
         adj = Point_Picker(left_img, right_img)
         quadri_left, quadri_right = adj.pick()
+        log.info('Points were picked.')
+        log.debug('\nquadri_left =\n{}\nquadri_right =\n{}'.format(quadri_left,quadri_right))
         rect_dest, self.hor_l = point_picker.find_rect(quadri_left, quadri_right)
+        log.info('Both homographys have been found.')
         self.left_trans, self.right_trans = point_picker.find_homographys(quadri_left, quadri_right, rect_dest)
         return left_img, right_img
 

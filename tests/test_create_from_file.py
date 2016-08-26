@@ -2,9 +2,17 @@ from context import composer
 from composer.core import Composer
 import cv2
 import numpy as np
+import logging
+import sys
 # import composer.imgtools
 
-
+handler = logging.StreamHandler(sys.stdout)
+logging.basicConfig
+logging.getLogger()#.setLevel(logging.DEBUG)
+core_log = logging.getLogger("composer")
+core_log.addHandler(handler)
+core_log.setLevel(logging.DEBUG)
+core_log.propagate = True
 pts = np.array([[[1.0, 1.0]]])
 print(type(pts))
 img_left_org = cv2.imread(

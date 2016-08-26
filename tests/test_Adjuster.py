@@ -1,7 +1,12 @@
 from context import composer
 from composer.core import Composer
-import numpy as np
 import cv2
+import logging.config
+import numpy as np
+
+# handler = logging.StreamHandler(sys.stdout)
+logging.config.fileConfig('logging_config.ini')
+
 
 c = Composer()
 camera_params_path = 'data/camera_params_matlab.npz'

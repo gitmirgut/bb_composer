@@ -3,7 +3,10 @@ import composer.core
 import numpy as np
 import cv2
 from composer import imgtools
+import logging.config
+# import sys
 
+logging.config.fileConfig('logging_config.ini')
 
 def draw_makers(img, pts, color=(0, 0, 255), marker_types=cv2.MARKER_TILTED_CROSS):
     img_m = np.copy(img)

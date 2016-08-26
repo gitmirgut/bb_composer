@@ -1,6 +1,9 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from logging import getLogger
+
+log = getLogger(__name__)
 
 
 class DraggableMarker(object):
@@ -43,7 +46,6 @@ class DraggableMarker(object):
         contains, attrd = self.mark.contains(event)
         if not contains:
             return
-        print('event contains', self.mark.get_xydata()[0])
         x, y = self.mark.get_xydata()[0]
         self.mark.set_color('r')
         self.press = x, y, event.xdata, event.ydata
@@ -102,19 +104,17 @@ class DraggableMarker(object):
 
     def on_key(self, event):
         """Check what key ist pressed and executes corresponding function."""
-        print(self.mark.axes)
         if event.inaxes != self.mark.axes:
             return
         contains, attrd = self.mark.contains(event)
         if not contains:
             return
         if event.key == 'r':
-            print("You pressed r, the marker will be refined!")
-            # print(self.img)
+            log.info('You pressed {}, the marker will be refined!'.format(event.key))
             xy = np.array([self.mark.get_xydata()[:]])
-            print('old coordinates = ' + str(xy))
+            log.debug('old coordinates = ' + str(xy))
             xy_new = refine(self.img, xy)
-            print('new coordinates = ' + str(xy_new))
+            log.debug('new coordinates = ' + str(xy_new))
             self.mark.set_xdata(xy_new[0][0][0])
             self.mark.set_ydata(xy_new[0][0][1])
             self.mark.set_color('y')
@@ -132,14 +132,15 @@ def dms_to_pts(dms_list):
     """Extract the coordinates of the draggable Markers from a list."""
     dms_list = list(dms_list)
     pts = np.zeros((len(dms_list), 2), np.float32)
-    for i in range(len(dms_list)):
-        pts[i] = dms_list[i].mark.get_xydata()[0]
+    for i, dm in enumerate(dms_list):
+        pts[i] = dm.mark.get_xydata()[0]
     return pts
 
 
 def add_draggable_marker(event, axis, dms, img):
+    log.info('Create draggable Marker.')
     """Add a DraggableMarker to the axis and to the list dms."""
-    print('x = ' + str(event.xdata) + '| y = ' + str(event.xdata))
+    log.debug('x = ' + str(event.xdata) + ' | y = ' + str(event.xdata))
     marker, = axis.plot(event.xdata, event.ydata, 'xr', markersize=20)
 
     # initialize draggable marker that is initialized with a Marker but

@@ -159,16 +159,16 @@ def argsort_pts(points):
     barycentre = points.sum(axis=0) / 4
 
     # var for saving the points in realtion to the barycentre
-    bary_vector = np.zeros((4, 2), np.float32)
+    bary_vectors = np.zeros((4, 2), np.float32)
 
     # var for saving the closest point of the origin
     A = None
     min_dist = None
 
-    for i in range(len(points)):
+    for i, point in enumerate(points):
 
         # determine the distance to the origin
-        cur_dist_origin = np.linalg.norm(points[i])
+        cur_dist_origin = np.linalg.norm(point)
 
         # save the closest point of the orgin
         if A is None or cur_dist_origin < min_dist:
@@ -176,15 +176,15 @@ def argsort_pts(points):
             A = i
 
         # determine point in relation to the barycentre
-        bary_vector[i] = points[i] - barycentre
+        bary_vectors[i] = point - barycentre
 
     angles = np.zeros(4, np.float32)
     # determine the angles of the different points in relation to the line
     # between cloest point of origin (A) and barycentre
-    for i in range(len(points)):
+    for i, bary_vector in enumerate(bary_vectors):
         if i != A:
-            cur_angle = np.arctan2((np.linalg.det((bary_vector[A], bary_vector[i]))), np.dot(
-                bary_vector[A], bary_vector[i]))
+            cur_angle = np.arctan2((np.linalg.det((bary_vectors[A], bary_vector))), np.dot(
+                bary_vectors[A], bary_vector))
             if cur_angle < 0:
                 cur_angle = 2 * np.pi + cur_angle
             angles[i] = cur_angle
