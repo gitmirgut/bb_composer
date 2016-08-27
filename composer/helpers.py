@@ -58,3 +58,40 @@ def get_rot_params(angle, shape):
     affine_mat = (translation_matrix * map_matrix)[0:2]
 
     return affine_mat, size_new
+
+def get_translation(shape_l, shape_r, homo_mat_l, homo_mat_r):
+    # get origina width and height of images
+    h_l, w_l = shape_l
+    h_r, w_r = shape_r
+    log.debug('(h_l,w_l) = {}'.format(shape_l))
+    corners_l = np.float32([
+        [0,     0],
+        [0,     h_l],
+        [w_l,   h_l],
+        [w_l,   0]
+    ]).reshape(-1, 1, 2)
+    corners_r = np.float32([
+        [0,     0],
+        [0,     h_r],
+        [w_r,   h_r],
+        [w_r,   0]
+    ]).reshape(-1, 1, 2)
+
+    # transform the corners of the images, to get the dimension of the
+    # transformed images and stitched image
+    corners_tr_l = cv2.perspectiveTransform(corners_l, homo_mat_l)
+    corners_tr_r = cv2.perspectiveTransform(corners_r, homo_mat_r)
+    pts = np.concatenate((corners_tr_l, corners_tr_r), axis=0)
+
+    # measure the max values in x and y direction to get the translation vector
+    # so that whole image will be shown
+    [xmin, ymin] = np.int32(pts.min(axis=0).ravel() - 0.5)
+    [xmax, ymax] = np.int32(pts.max(axis=0).ravel() + 0.5)
+    t = [-xmin, -ymin]
+
+    # define translation matrix
+    trans_m = np.array(
+        [[1, 0, t[0]], [0, 1, t[1]], [0, 0, 1]])  # translate
+    total_size = (xmax - xmin, ymax - ymin)
+
+    return trans_m, total_size
