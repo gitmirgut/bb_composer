@@ -44,9 +44,9 @@ cv2.imwrite('1_1.jpg', img_right)
 img_left, img_right = nc._rectify_images(img_left, img_right)
 # pts_left = nc.map_coordinates(pts_left)
 pts_left = imgtools.rectify_pts(
-    pts_left, nc.intrinsic_matrix, nc.distortion_coeff)
+    pts_left, nc.intr_mat, nc.dstr_coeff)
 pts_right = imgtools.rectify_pts(
-    pts_right, nc.intrinsic_matrix, nc.distortion_coeff)
+    pts_right, nc.intr_mat, nc.dstr_coeff)
 # pts_right = nc.map_coordinates(pts_right)
 
 img_left_d = draw_makers(img_left, pts_left)

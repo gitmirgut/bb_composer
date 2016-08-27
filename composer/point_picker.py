@@ -8,8 +8,8 @@ class Point_Picker(object):
     """GUI for picking points.
     """
 
-    def __init__(self, left_img, right_img):
-        self.left_img = left_img
+    def __init__(self, img_l, right_img):
+        self.img_l = img_l
         self.right_img = right_img
         self.count_dms_left = 0
         self.count_dms_right = 0
@@ -26,7 +26,7 @@ class Point_Picker(object):
                 if event.inaxes == ax_left and len(dms_left) < 4:
                     self.count_dms_left += 1
                     add_draggable_marker(
-                        event, ax_left, dms_left, self.left_img)
+                        event, ax_left, dms_left, self.img_l)
                 elif event.inaxes == ax_right and len(dms_right) < 4:
                     self.count_dms_right += 1
                     add_draggable_marker(
@@ -36,7 +36,7 @@ class Point_Picker(object):
             nrows=1, ncols=2, tight_layout=True)
         plt.setp(ax_right.get_yticklabels(), visible=False)
         # TODO remove alpha channel when exist for display
-        ax_left.imshow(self.left_img)
+        ax_left.imshow(self.img_l)
         ax_right.imshow(self.right_img)
         dms_left = set()
         dms_right = set()

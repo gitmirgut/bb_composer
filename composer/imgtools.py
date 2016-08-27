@@ -4,21 +4,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-def rectify_img(img, IntrinsicMatrix, distortion_coeff):
+def rectify_img(img, IntrinsicMatrix, dstr_coeff):
     """Take an image and undistort it."""
     # TODO check size, cmp matl
     h, w = img.shape[:2]
     newCameraMatrix_m, validPixRoi_m = cv2.getOptimalNewCameraMatrix(
-        IntrinsicMatrix, distortion_coeff, (w, h), 1, (w, h), 0)
+        IntrinsicMatrix, dstr_coeff, (w, h), 1, (w, h), 0)
 
     img_rectified = cv2.undistort(
-        img, IntrinsicMatrix, distortion_coeff, None, newCameraMatrix_m)
+        img, IntrinsicMatrix, dstr_coeff, None, newCameraMatrix_m)
     return img_rectified
 
-def rectify_pts(pts, IntrinsicMatrix, distortion_coeff, image_size=(4000,3000)):
+def rectify_pts(pts, IntrinsicMatrix, dstr_coeff, image_size=(4000,3000)):
     newCameraMatrix_m, validPixRoi_m = cv2.getOptimalNewCameraMatrix(
-        IntrinsicMatrix, distortion_coeff, image_size, 1, image_size, 0)
-    return cv2.undistortPoints(pts, IntrinsicMatrix, distortion_coeff, None, newCameraMatrix_m)
+        IntrinsicMatrix, dstr_coeff, image_size, 1, image_size, 0)
+    return cv2.undistortPoints(pts, IntrinsicMatrix, dstr_coeff, None, newCameraMatrix_m)
 
 
 def rotate_image(img, angle):

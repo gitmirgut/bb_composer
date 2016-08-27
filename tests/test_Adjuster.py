@@ -13,7 +13,7 @@ camera_params_path = 'data/camera_params_matlab.npz'
 camera_params = np.load(camera_params_path)
 c.set_camera_params(camera_params)
 test = np.zeros((10, 1, 2), dtype=np.float32)
-# test_o ut = imgtools.rectify_pts(test, c.intrinsic_matrix, c.distortion_coeff)
+# test_o ut = imgtools.rectify_pts(test, c.intr_mat, c.dstr_coeff)
 # print(test_out[test_out < 0]) TODO problematisch wenn < 0 ?
 # print(c.map_coordinates(test))
 img_left_org = cv2.imread(
@@ -26,8 +26,8 @@ cv2.imwrite("result.png", test)
 np.savez('composer_params.npz',
          left_rot_angle=c.left_rot_angle,
          right_rot_angle=c.right_rot_angle,
-         intrinsic_matrix=c.intrinsic_matrix,
-         distortion_coeff=c.distortion_coeff,
+         intr_mat=c.intr_mat,
+         dstr_coeff=c.dstr_coeff,
          hor_l = c.hor_l,
          left_trans=c.left_trans,
          right_trans=c.right_trans)
