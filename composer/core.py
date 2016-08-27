@@ -11,56 +11,54 @@ log = getLogger(__name__)
 
 class Composer(object):
 
-    def __init__(self, left_rot_angle=90, right_rot_angle=-90):
-        self.left_img = None
-        self.right_img = None
-        self.intrinsic_matrix = None
-        self.distortion_coeff = None
-        self.left_rot_angle = left_rot_angle
-        self.right_rot_angle = right_rot_angle
+    def __init__(self, rot_angle_l=90, rot_angle_r=-90):
+        self.intr_mat = None
+        self.dstr_co = None
+        self.rot_angle_l = rot_angle_l
+        self.rot_angle_r = rot_angle_r
         self.hor_l = None
-        self.left_trans = None
-        self.right_trans = None
+        self.homo_mat_l = None
+        self.homo_mat_r = None
 
     def create_from_file(file):
         '''Create new Composer with data loaded from file'''
         # TODO error wenn file nicht gefunden
         c = Composer()
         with np.load(file) as data:
-            c.left_rot_angle = data['left_rot_angle']
-            c.right_rot_angle = data['right_rot_angle']
-            c.intrinsic_matrix = data['intrinsic_matrix']
-            c.distortion_coeff = data['distortion_coeff']
-            c.left_trans = data['left_trans']
-            c.right_trans = data['right_trans']
+            c.rot_angle_l = data['rot_angle_l']
+            c.rot_angle_r = data['rot_angle_r']
+            c.intr_mat = data['intrinsic_matrix']
+            c.dstr_co = data['distortion_coeff']
+            c.homo_mat_l = data['homo_mat_l']
+            c.homo_mat_r = data['homo_mat_r']
             c.hor_l = data['hor_l']
         log.info('New Composer created from file {}'.format(file))
         log.debug(c)
         return c
 
     def __repr__(self):
-        return('{}(\nintrinsic=\n{},\ndist_coeff\t= {},\nleft_rot_angle\t= {},\n'
-               'right_rot_angle\t= {},\nleft_trans =\n{},\nright_trans =\n{}\n)'
+        return('{}(\nintrinsic=\n{},\ndist_coeff\t= {},\nrot_angle_l\t= {},\n'
+               'rot_angle_r\t= {},\nhomo_mat_l =\n{},\nhomo_mat_r =\n{}\n)'
                .format(self.__class__.__name__,
-                       self.intrinsic_matrix,
-                       self.distortion_coeff,
-                       self.left_rot_angle,
-                       self.right_rot_angle,
-                       self.left_trans,
-                       self.right_trans))
+                       self.intr_mat,
+                       self.dstr_co,
+                       self.rot_angle_l,
+                       self.rot_angle_r,
+                       self.homo_mat_l,
+                       self.homo_mat_r))
 
     def set_camera_params(self, camera_params):
         """Set the camera intrinsic and extrinsic parameters."""
-        self.intrinsic_matrix = camera_params['intrinsic_matrix']
-        self.distortion_coeff = camera_params['distortion_coeff']
+        self.intr_mat = camera_params['intrinsic_matrix']
+        self.dstr_co = camera_params['distortion_coeff']
         log.info('Camera parameters loaded.')
 
     def compose(self, left_img, right_img):
         """Compose both images to panorama."""
-        left_img, right_img = self.estimateTransform(left_img, right_img)
-        return self.composePanorama(left_img, right_img)
+        left_img, right_img = self.estimate_transform(left_img, right_img)
+        return self.compose_panorama(left_img, right_img)
 
-    def estimateTransform(self, left_img, right_img):
+    def estimate_transform(self, left_img, right_img):
         """Determine the Transformation matrix for both images."""
         # estimates the image transformation of the left and right image
         left_img, right_img = self._rectify_images(left_img, right_img)
@@ -75,22 +73,22 @@ class Composer(object):
         log.debug('\nquadri_left =\n{}\nquadri_right =\n{}'.format(quadri_left,quadri_right))
         rect_dest, self.hor_l = point_picker.find_rect(quadri_left, quadri_right)
         log.info('Both homographys have been found.')
-        self.left_trans, self.right_trans = point_picker.find_homographys(quadri_left, quadri_right, rect_dest)
+        self.homo_mat_l, self.homo_mat_r = point_picker.find_homographys(quadri_left, quadri_right, rect_dest)
         return left_img, right_img
 
     def _rectify_images(self, left_img, right_img):
         """Undistort the images by the give camera parameters"""
         left_img = imgtools.rectify_img(
-            left_img, self.intrinsic_matrix, self.distortion_coeff)
+            left_img, self.intr_mat, self.dstr_co)
         right_img = imgtools.rectify_img(
-            right_img, self.intrinsic_matrix, self.distortion_coeff)
+            right_img, self.intr_mat, self.dstr_co)
         return left_img, right_img
 
     def _rotate_images(self, left_img, right_img):
         left_img, self.left_rot_mat = imgtools.rotate_image(
-            left_img, self.left_rot_angle)
+            left_img, self.rot_angle_l)
         right_img,  self.right_rot_mat = imgtools.rotate_image(
-            right_img, self.right_rot_angle)
+            right_img, self.rot_angle_r)
         return left_img, right_img
 
     def _rotate_points(self, points, left=True):
@@ -99,7 +97,7 @@ class Composer(object):
         else:
             return cv2.transform(points, self.right_rot_mat)
 
-    def composePanorama(self, left_img, right_img):
+    def compose_panorama(self, left_img, right_img):
         # get origina width and height of images
         left_h, left_w = left_img.shape[:2]
         right_h, right_w = right_img.shape[:2]
@@ -119,9 +117,9 @@ class Composer(object):
         # transform the corners of the images, to get the dimension of the
         # transformed images and stitched image
         left_corners_trans = cv2.perspectiveTransform(
-            left_corners, self.left_trans)
+            left_corners, self.homo_mat_l)
         right_corners_trans = cv2.perspectiveTransform(
-            right_corners, self.right_trans)
+            right_corners, self.homo_mat_r)
         pts = np.concatenate((left_corners_trans, right_corners_trans), axis=0)
 
         # measure the max values in x and y direction to get the translation vector
@@ -136,11 +134,11 @@ class Composer(object):
         total_size = (xmax - xmin, ymax - ymin)
 
         result_right = cv2.warpPerspective(
-            right_img, trans_m.dot(self.right_trans), total_size)
+            right_img, trans_m.dot(self.homo_mat_r), total_size)
         left_img = cv2.warpPerspective(
-            left_img, trans_m.dot(self.left_trans), total_size)
-        self.right_trans = trans_m.dot(self.right_trans)
-        self.left_trans = trans_m.dot(self.left_trans)
+            left_img, trans_m.dot(self.homo_mat_l), total_size)
+        self.homo_mat_r = trans_m.dot(self.homo_mat_r)
+        self.homo_mat_l = trans_m.dot(self.homo_mat_l)
         # unify both layers
         result_right[:total_size[1], :int(self.hor_l + t[0])
                      ] = left_img[:total_size[1], :int(self.hor_l + t[0])]
@@ -148,6 +146,6 @@ class Composer(object):
 
     def map_coordinates(self, pts, left=True):
         pts = imgtools.rectify_pts(
-            pts, self.intrinsic_matrix, self.distortion_coeff)
+            pts, self.intr_mat, self.dstr_co)
         pts = self._rotate_points(pts, left)
         return(pts)

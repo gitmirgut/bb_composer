@@ -24,12 +24,12 @@ test = c.compose(img_left_org, img_right_org)
 
 cv2.imwrite("result.png", test)
 np.savez('composer_params.npz',
-         left_rot_angle=c.left_rot_angle,
-         right_rot_angle=c.right_rot_angle,
+         rot_angle_l=c.rot_angle_l,
+         rot_angle_r=c.rot_angle_r,
          intr_mat=c.intr_mat,
-         dstr_coeff=c.dstr_coeff,
+         dstr_coeff=c.dstr_co,
          hor_l = c.hor_l,
-         left_trans=c.left_trans,
-         right_trans=c.right_trans)
+         homo_mat_l=c.homo_mat_l,
+         homo_mat_r=c.homo_mat_r)
 npzfile = np.load('composer_params.npz')
 print(npzfile.files)
