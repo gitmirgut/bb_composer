@@ -1,4 +1,5 @@
 # TODO rename imgtools to imagetools and import as imgt
+import composer.helpers as helpers
 import composer.imgtools as imgtools
 import composer.point_picker as point_picker
 from composer.point_picker import Point_Picker
@@ -14,11 +15,90 @@ class Composer(object):
     def __init__(self, rot_angle_l=90, rot_angle_r=-90):
         self.intr_mat = None
         self.dstr_co = None
+        self.new_cam_mat = None
+        # self.cam_mat_r = None
+        self.rot_mat_l = None
+        self.rot_mat_r = None
+        self.rot_size_l = None
+        self.rot_size_r = None
         self.rot_angle_l = rot_angle_l
         self.rot_angle_r = rot_angle_r
+        self.rot_mat_l = None
+        self.rot_mat_r = None
         self.hor_l = None
         self.homo_mat_l = None
         self.homo_mat_r = None
+
+    def set_rectification_params(self, intr_mat, dstr_co, shape=(3000, 4000)):
+        self.intr_mat = intr_mat
+        self.dstr_co = dstr_co
+        self.new_cam_mat = helpers.get_cam_mat(intr_mat, dstr_co, shape)
+
+    def rectify_images(self, *images):
+        """Rectifies images.
+
+        Returns a list of rectified images, except if just one image as argument
+        is passed, then the return value is just an image.
+        """
+
+        # checks if arguments list is empty
+        if not images:
+            log.warning('No images rectified.')
+            return None
+
+        rect_imgs = []
+        for img in images:
+            rect_imgs.append(cv2.undistort(img, self.intr_mat, self.dstr_co, None, self.new_cam_mat))
+
+        # if just one argument is passed, return just rectified image
+        if len(rect_imgs) == 1:
+            return rect_imgs[0]
+
+        return rect_imgs
+
+    def set_rotation_parameters(self, angle_l=90, angle_r=-90, shape=(3000, 4000)):
+        self.rot_mat_l, self.rot_size_l = helpers.get_rot_params(angle_l, shape)
+        self.rot_mat_r, self.rot_size_r = helpers.get_rot_params(angle_r, shape)
+
+    def rotate(self, *images, rot_mat=None, rot_size=None):
+        if not images:
+            log.warning('No images rotated.')
+            return None
+
+        if rot_mat is None:
+            rot_mat = self.rot_mat_l
+            rot_size = self.rot_size_l
+
+        rot_imgs = []
+        for img in images:
+            rot_imgs.append(cv2.warpAffine(
+                img,
+                rot_mat,
+                rot_size,
+                flags=cv2.INTER_LINEAR
+            ))
+
+        # if just one argument is passed, return just rectified image
+        if len(rot_imgs) == 1:
+            return rot_imgs[0]
+
+        return rot_imgs
+
+    def rotate_left(self, *images):
+        return self.rotate(*images)
+
+    def rotate_right(self, *images):
+         return self.rotate(*images, rot_mat=self.rot_mat_r, rot_size=self.rot_size_r)
+
+    def set_homography(self, img_l, img_r):
+        log.info('Point Picker will be initialised.')
+        adj = Point_Picker(img_l, img_r)
+        quadri_left, quadri_right = adj.pick()
+        log.info('Points were picked.')
+        log.debug('\nquadri_left =\n{}\nquadri_right =\n{}'.format(quadri_left,quadri_right))
+        rect_dest, self.hor_l = point_picker.find_rect(quadri_left, quadri_right)
+        log.info('Both homographys have been found.')
+        self.homo_mat_l, self.homo_mat_r = point_picker.find_homographys(quadri_left, quadri_right, rect_dest)
 
     def create_from_file(file):
         '''Create new Composer with data loaded from file'''
@@ -31,6 +111,7 @@ class Composer(object):
             c.dstr_co = data['distortion_coeff']
             c.homo_mat_l = data['homo_mat_l']
             c.homo_mat_r = data['homo_mat_r']
+            c.new_cam_mat = data['new_cam_mat']
             c.hor_l = data['hor_l']
         log.info('New Composer created from file {}'.format(file))
         log.debug(c)
@@ -38,14 +119,15 @@ class Composer(object):
 
     def __repr__(self):
         return('{}(\nintrinsic=\n{},\ndist_coeff\t= {},\nrot_angle_l\t= {},\n'
-               'rot_angle_r\t= {},\nhomo_mat_l =\n{},\nhomo_mat_r =\n{}\n)'
+               'rot_angle_r\t= {},\nhomo_mat_l =\n{},\nhomo_mat_r =\n{},\nnew_cam_mat=\n{})'
                .format(self.__class__.__name__,
                        self.intr_mat,
                        self.dstr_co,
                        self.rot_angle_l,
                        self.rot_angle_r,
                        self.homo_mat_l,
-                       self.homo_mat_r))
+                       self.homo_mat_r,
+                       self.new_cam_mat))
 
     def set_camera_params(self, camera_params):
         """Set the camera intrinsic and extrinsic parameters."""
@@ -85,17 +167,17 @@ class Composer(object):
         return left_img, right_img
 
     def _rotate_images(self, left_img, right_img):
-        left_img, self.left_rot_mat = imgtools.rotate_image(
+        left_img, self.rot_mat_l = imgtools.rotate_image(
             left_img, self.rot_angle_l)
-        right_img,  self.right_rot_mat = imgtools.rotate_image(
+        right_img,  self.rot_mat_r = imgtools.rotate_image(
             right_img, self.rot_angle_r)
         return left_img, right_img
 
     def _rotate_points(self, points, left=True):
         if left:
-            return cv2.transform(points, self.left_rot_mat)
+            return cv2.transform(points, self.rot_mat_l)
         else:
-            return cv2.transform(points, self.right_rot_mat)
+            return cv2.transform(points, self.rot_mat_r)
 
     def compose_panorama(self, left_img, right_img):
         # get origina width and height of images
