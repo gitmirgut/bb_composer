@@ -1,7 +1,7 @@
 from context import composer
 from composer.core import Composer
-import numpy as np
 import cv2
+import numpy as np
 import logging.config
 
 logging.config.fileConfig('logging_config.ini')
@@ -10,7 +10,7 @@ camera_params_path = 'data/camera_params_matlab.npz'
 camera_params = np.load(camera_params_path)
 intr_mat = camera_params['intrinsic_matrix']
 dstr_co = camera_params['distortion_coeff']
-shape = (3000,4000)
+shape = (3000, 4000)
 c = Composer()
 c.set_rectification_params(intr_mat, dstr_co, shape)
 img_left_org = cv2.imread(

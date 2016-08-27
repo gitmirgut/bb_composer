@@ -1,7 +1,7 @@
 import cv2
+from logging import getLogger
 import matplotlib.pyplot as plt
 import numpy as np
-from logging import getLogger
 
 log = getLogger(__name__)
 
@@ -138,8 +138,8 @@ def dms_to_pts(dms_list):
 
 
 def add_draggable_marker(event, axis, dms, img):
-    log.info('Create draggable Marker.')
     """Add a DraggableMarker to the axis and to the list dms."""
+    log.info('Create draggable Marker.')
     log.debug('x = ' + str(event.xdata) + ' | y = ' + str(event.xdata))
     marker, = axis.plot(event.xdata, event.ydata, 'xr', markersize=20)
 

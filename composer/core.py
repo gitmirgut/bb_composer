@@ -1,6 +1,5 @@
 # TODO rename imgtools to imagetools and import as imgt
 import composer.helpers as helpers
-import composer.imgtools as imgtools
 import composer.point_picker as point_picker
 from composer.point_picker import Point_Picker
 import cv2
@@ -11,6 +10,7 @@ log = getLogger(__name__)
 
 
 class Composer(object):
+    """Compose two images or transform points to a composed area/image."""
 
     def __init__(self, rot_angle_l=90, rot_angle_r=-90):
         self.intr_mat = None
@@ -116,10 +116,10 @@ class Composer(object):
         log.info('Points were picked.')
         log.debug('\nquadri_left =\n{}\nquadri_right =\n{}'.format(
             quadri_left, quadri_right))
-        rect_dest, self.hor_l = point_picker.find_rect(
+        rect_dest, self.hor_l = helpers.find_rect(
             quadri_left, quadri_right)
         log.info('Both homographys have been found.')
-        homo_mat_l, homo_mat_r = point_picker.find_homographys(
+        homo_mat_l, homo_mat_r = helpers.find_homographys(
             quadri_left, quadri_right, rect_dest)
         self.trans_m, self.total_size = helpers.get_translation(
             img_l.shape[:2], img_r.shape[:2], homo_mat_l, homo_mat_r)
