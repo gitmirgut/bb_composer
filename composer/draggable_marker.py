@@ -109,7 +109,7 @@ class DraggableMarker(object):
         contains, attrd = self.mark.contains(event)
         if not contains:
             return
-        if event.key == 'r':
+        if event.key == 'b':
             log.info('You pressed {}, the marker will be refined!'.format(event.key))
             xy = np.array([self.mark.get_xydata()[:]])
             log.debug('old coordinates = ' + str(xy))
