@@ -5,7 +5,7 @@ from composer.draggable_marker import add_draggable_marker
 from composer.draggable_marker import dms_to_pts
 
 
-class Point_Picker(object):
+class PointPicker(object):
     """GUI for picking points."""
 
     def __init__(self, img_l, right_img):

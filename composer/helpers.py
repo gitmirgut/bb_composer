@@ -9,16 +9,16 @@ log = getLogger(__name__)
 def get_cam_mat(intr_mat, dstr_co, shape):
     """Determine the new Camera Matrix."""
     h, w = shape
-    newCameraMatrix, __ = cv2.getOptimalNewCameraMatrix(
+    new_cam_matrix, __ = cv2.getOptimalNewCameraMatrix(
         intr_mat, dstr_co, (w, h), 1, (w, h), 0)
-    return newCameraMatrix
+    return new_cam_matrix
 
 
 def get_rot_params(angle, shape):
     """Rotate img around center point by given angle.
 
     The returned img will be large enough to hold the entire
-    new img, with a black background.
+    new img, with A black background.
     """
     # Get img size
     size = (shape[1], shape[0])
@@ -188,25 +188,25 @@ def find_homographys(quadri_left, quadri_right, rect_dest):
 def sort_pts(pts):
     r"""Sort points as convex quadrilateral.
 
-    Sort points in clockwise order, so that they form a convex quadrilateral.
+    Sort points in clockwise order, so that they form A convex quadrilateral.
 
-    pts:                sort_pts:
+    pts:                sorted_pts:
          x   x                      A---B
                       --->         /     \
        x       x                  D-------C
 
     """
-    sort_pts = np.zeros((len(pts), 2), np.float32)
+    sorted_pts = np.zeros((len(pts), 2), np.float32)
     for i in range(len(pts)):
-        sort_pts[i] = pts[argsort_pts(pts)[i]]
-    return sort_pts
+        sorted_pts[i] = pts[argsort_pts(pts)[i]]
+    return sorted_pts
 
 
 def argsort_pts(points):
     r"""Sort points as convex quadrilateral.
 
     Returns the indices that will sort the points in clockwise order,
-    so that they form a convex quadrilateral.
+    so that they form A convex quadrilateral.
 
     points:                quadri:
          x   x                      A---B
@@ -217,13 +217,12 @@ def argsort_pts(points):
     assert (len(points) == 4)
 
     # calculate the barycentre / centre of gravity
-    barycentre = np.zeros((1, 2), np.float32)
     barycentre = points.sum(axis=0) / 4
 
     # var for saving the points in realtion to the barycentre
     bary_vectors = np.zeros((4, 2), np.float32)
 
-    # var for saving the closest point of the origin
+    # var for saving the A point of the origin
     A = None
     min_dist = None
 
@@ -232,7 +231,7 @@ def argsort_pts(points):
         # determine the distance to the origin
         cur_dist_origin = np.linalg.norm(point)
 
-        # save the closest point of the orgin
+        # save the A point of the orgin
         if A is None or cur_dist_origin < min_dist:
             min_dist = cur_dist_origin
             A = i
@@ -242,13 +241,13 @@ def argsort_pts(points):
 
     angles = np.zeros(4, np.float32)
     # determine the angles of the different points in relation to the line
-    # between cloest point of origin (A) and barycentre
+    # between closest point of origin (A) and barycentre
     for i, bary_vector in enumerate(bary_vectors):
         if i != A:
             cur_angle = np.arctan2(
                 (np.linalg.det((bary_vectors[A], bary_vector))), np.dot(
                     bary_vectors[A], bary_vector))
             if cur_angle < 0:
-                cur_angle = 2 * np.pi + cur_angle
+                cur_angle += 2 * np.pi
             angles[i] = cur_angle
     return np.argsort(angles)

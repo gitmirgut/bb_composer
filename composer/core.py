@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 import composer.helpers as helpers
-from composer.point_picker import Point_Picker
+from composer.point_picker import PointPicker
 
 log = getLogger(__name__)
 
@@ -184,7 +184,7 @@ class Composer(object):
     def set_couple_parameters(self, img_l, img_r):
         """Determine special arguments for coupling."""
         log.info('Point Picker will be initialised.')
-        adj = Point_Picker(img_l, img_r)
+        adj = PointPicker(img_l, img_r)
         quadri_left, quadri_right = adj.pick()
         log.info('Points were picked.')
         log.debug('\nquadri_left =\n{}\nquadri_right =\n{}'.format(
