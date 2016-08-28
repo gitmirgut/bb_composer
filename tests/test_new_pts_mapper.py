@@ -96,3 +96,17 @@ result_m = draw_makers(result, pts_left_ho)
 result_m = draw_makers(result_m, pts_right_ho)
 cv2.imwrite('./data/pts_rect/6.jpg', result_m)
 # cv2.imwrite('./data/pts_rect/4_1.jpg', img_r_ro_m)
+
+'''
+All in One
+'''
+# image
+unit = c.compose(img_l_m, img_r_m)
+cv2.imwrite('./data/pts_rect/7.jpg', unit)
+#  points
+pts_l = c.map_coordinate_left(pts_left_org)
+pts_r = c.map_coordinate_right(pts_right_org)
+# marker
+unit_m = draw_makers(unit, pts_l)
+unit_m = draw_makers(unit_m, pts_r)
+cv2.imwrite('./data/pts_rect/8.jpg', unit_m)

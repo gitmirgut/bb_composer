@@ -210,3 +210,19 @@ class Composer(object):
 
     def apply_homography_r(self, pts):
         return self.apply_homography(pts, self.homo_mat_r)
+
+    def compose(self, img_l, img_r):
+        img_l_re, img_r_re = self.rectify_images(img_l, img_r)
+        img_l_ro = self.rotate_img_l(img_l_re)
+        img_r_ro = self.rotate_img_r(img_r_re)
+        return self.couple_pano(img_l_ro, img_r_ro)
+
+    def map_coordinate_left(self, pts):
+        pts_re = self.rectify_points(pts)
+        pts_ro = self.rotate_pts_l(pts_re)
+        return self.apply_homography_l(pts_ro)
+
+    def map_coordinate_right(self, pts):
+        pts_re = self.rectify_points(pts)
+        pts_ro = self.rotate_pts_r(pts_re)
+        return self.apply_homography_r(pts_ro)
