@@ -12,6 +12,7 @@ log = getLogger(__name__)
 class Composer(object):
     """Compose two images or transform points to a composed area/image."""
 
+    # TODO kann angle raus?
     def __init__(self, rot_angle_l=90, rot_angle_r=-90):
         self.intr_mat = None
         self.dstr_co = None
@@ -26,6 +27,43 @@ class Composer(object):
         self.homo_mat_l = None
         self.homo_mat_r = None
         self.total_size = None
+        self.trans_m = None
+
+    def save_arguments(self, path):
+        np.savez(path,
+                 intr_mat=self.intr_mat,
+                 dstr_co=self.dstr_co,
+                 new_cam_mat=self.new_cam_mat,
+                 rot_mat_l=self.rot_mat_l,
+                 rot_mat_r=self.rot_mat_r,
+                 rot_size_l=self.rot_size_l,
+                 rot_size_r=self.rot_size_r,
+                 hor_l=self.hor_l,
+                 homo_mat_l=self.homo_mat_l,
+                 homo_mat_r=self.homo_mat_r,
+                 total_size=self.total_size,
+                 trans_m=self.trans_m
+                 )
+        log.info('Composer arguments saved to {}'.format(path))
+        log.debug('rot_type after save {}'.format(type(self.rot_size_l)))
+
+    def load_arguments(self, path):
+        with np.load(path) as data:
+            self.intr_mat = data['intr_mat']
+            self.dstr_co = data['dstr_co']
+            self.new_cam_mat = data['new_cam_mat']
+            self.rot_mat_l = data['rot_mat_l']
+            self.rot_mat_r = data['rot_mat_r']
+            self.rot_size_l = tuple(data['rot_size_l'])
+            self.rot_size_r = tuple(data['rot_size_r'])
+            self.hor_l = data['hor_l']
+            self.homo_mat_l = data['homo_mat_l']
+            self.homo_mat_r = data['homo_mat_r']
+            self.total_size = tuple(data['total_size'])
+            self.trans_m = data['trans_m']
+        log.info('Composer arguments loaded from file {}'.format(path))
+        log.debug(self)
+        log.debug('rot_type after load {}'.format(type(self.rot_size_l)))
 
     def __repr__(self):
         return('{}(\nintrinsic=\n{},\ndist_coeff\t= {},\nhomo_mat_l =\n{},\nhomo_mat_r =\n{},\nnew_cam_mat=\n{})'
@@ -65,23 +103,15 @@ class Composer(object):
 
         return rect_imgs
 
-    def rectify_points(self, *points):
+    def rectify_points(self, points):
         """Rectifiy points.
 
         Returns a list of rectified points, except if just one point as
         argument is passed, then the return value is just an point.
         """
-
-        if not points:
-            log.warning('List of points for rectification is empty.')
-            return None
-
-        rect_pts = []
-        for pt in points:
-            rect_pts.append(cv2.undistortPoints(pt, self.intr_mat, self.dstr_co, None, self.new_cam_mat))
-
-        return rect_pts
-
+        # TODO check when empty
+        return cv2.undistortPoints(
+            points, self.intr_mat, self.dstr_co, None, self.new_cam_mat)
 
     def set_rotation_parameters(self, angle_l=90, angle_r=-90, shape=(3000, 4000)):
         """Determine special arguments for rotation of images and points."""
@@ -101,10 +131,12 @@ class Composer(object):
         if rot_mat is None:
             rot_mat = self.rot_mat_l
             rot_size = self.rot_size_l
+        log.debug('rot_size = {}'.format(type(rot_size)))
 
         # rotate each image of images
         rot_imgs = []
         for img in images:
+            log.debug('{}\n{}\n{}'.format(img.shape, rot_mat, rot_size))
             rot_imgs.append(cv2.warpAffine(
                 img,
                 rot_mat,
@@ -125,6 +157,17 @@ class Composer(object):
     def rotate_img_r(self, *images):
         """Rotate image with the arguments for the right image."""
         return self.rotate_img(*images, rot_mat=self.rot_mat_r, rot_size=self.rot_size_r)
+
+    def rotate_pts(self, pts, rot_mat=None):
+        if rot_mat is None:
+            rot_mat = self.rot_mat_l
+        return cv2.transform(pts, rot_mat)
+
+    def rotate_pts_l(self, pts):
+        return self.rotate_pts(pts, rot_mat=self.rot_mat_l)
+
+    def rotate_pts_r(self, pts):
+        return self.rotate_pts(pts, rot_mat=self.rot_mat_r)
 
     def set_couple_parameters(self, img_l, img_r):
         """Determine special arguments for coupling."""
@@ -157,19 +200,13 @@ class Composer(object):
                  ] = result_l[:, :int(self.hor_l + self.trans_m[0][2])]
         return result_r
 
-    def create_from_file(file):
-        """Create new Composer with data loaded from file."""
-        # TODO error wenn file nicht gefunden
-        c = Composer()
-        with np.load(file) as data:
-            c.rot_angle_l = data['rot_angle_l']
-            c.rot_angle_r = data['rot_angle_r']
-            c.intr_mat = data['intrinsic_matrix']
-            c.dstr_co = data['distortion_coeff']
-            c.homo_mat_l = data['homo_mat_l']
-            c.homo_mat_r = data['homo_mat_r']
-            c.new_cam_mat = data['new_cam_mat']
-            c.hor_l = data['hor_l']
-        log.info('New Composer created from file {}'.format(file))
-        log.debug(c)
-        return c
+    def apply_homography(self, pts, homo=None):
+        if homo is None:
+            homo = self.homo_mat_l
+        return cv2.perspectiveTransform(pts, homo)
+
+    def apply_homography_l(self, pts):
+        return self.apply_homography(pts, self.homo_mat_l)
+
+    def apply_homography_r(self, pts):
+        return self.apply_homography(pts, self.homo_mat_r)
