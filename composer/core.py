@@ -13,7 +13,7 @@ class Composer(object):
     """Compose two images or transform points to a composed area/image."""
 
     # TODO kann angle raus?
-    def __init__(self, rot_angle_l=90, rot_angle_r=-90):
+    def __init__(self):
         self.intr_mat = None
         self.dstr_co = None
         self.new_cam_mat = None
@@ -30,6 +30,7 @@ class Composer(object):
         self.trans_m = None
 
     def save_arguments(self, path):
+        """Load arguments for the Composer from a file."""
         np.savez(path,
                  intr_mat=self.intr_mat,
                  dstr_co=self.dstr_co,
@@ -45,9 +46,9 @@ class Composer(object):
                  trans_m=self.trans_m
                  )
         log.info('Composer arguments saved to {}'.format(path))
-        log.debug('rot_type after save {}'.format(type(self.rot_size_l)))
 
     def load_arguments(self, path):
+        """Load arguments for the Composer from a file."""
         with np.load(path) as data:
             self.intr_mat = data['intr_mat']
             self.dstr_co = data['dstr_co']
@@ -63,10 +64,13 @@ class Composer(object):
             self.trans_m = data['trans_m']
         log.info('Composer arguments loaded from file {}'.format(path))
         log.debug(self)
-        log.debug('rot_type after load {}'.format(type(self.rot_size_l)))
 
     def __repr__(self):
-        return('{}(\nintrinsic=\n{},\ndist_coeff\t= {},\nhomo_mat_l =\n{},\nhomo_mat_r =\n{},\nnew_cam_mat=\n{})'
+        return('{}(\nintrinsic=\n{}'
+               ',\ndist_coeff = {},'
+               '\nhomo_mat_l =\n{},'
+               '\nhomo_mat_r =\n{},'
+               '\nnew_cam_mat=\n{})'
                .format(self.__class__.__name__,
                        self.intr_mat,
                        self.dstr_co,
@@ -159,14 +163,17 @@ class Composer(object):
         return self.rotate_img(*images, rot_mat=self.rot_mat_r, rot_size=self.rot_size_r)
 
     def rotate_pts(self, pts, rot_mat=None):
+        """Rotate points, by given rot_mat"""
         if rot_mat is None:
             rot_mat = self.rot_mat_l
         return cv2.transform(pts, rot_mat)
 
     def rotate_pts_l(self, pts):
+        """Rotate point with the args for the left part of the area."""
         return self.rotate_pts(pts, rot_mat=self.rot_mat_l)
 
     def rotate_pts_r(self, pts):
+        """Rotate point with the args for the right part of the area."""
         return self.rotate_pts(pts, rot_mat=self.rot_mat_r)
 
     def set_couple_parameters(self, img_l, img_r):
@@ -201,23 +208,28 @@ class Composer(object):
         return result_r
 
     def apply_homography(self, pts, homo=None):
+        """Make a perspective Transform."""
         if homo is None:
             homo = self.homo_mat_l
         return cv2.perspectiveTransform(pts, homo)
 
     def apply_homography_l(self, pts):
+        """Make a perspective Transform of the points in the left area."""
         return self.apply_homography(pts, self.homo_mat_l)
 
     def apply_homography_r(self, pts):
+        """Make a perspective Transform of the points in the right area."""
         return self.apply_homography(pts, self.homo_mat_r)
 
     def compose(self, img_l, img_r):
+        """Compose two unhandled images."""
         img_l_re, img_r_re = self.rectify_images(img_l, img_r)
         img_l_ro = self.rotate_img_l(img_l_re)
         img_r_ro = self.rotate_img_r(img_r_re)
         return self.couple_pano(img_l_ro, img_r_ro)
 
     def map_coordinate_left(self, pts):
+        """Maps unhandled points to handled"""
         pts_re = self.rectify_points(pts)
         pts_ro = self.rotate_pts_l(pts_re)
         return self.apply_homography_l(pts_ro)
