@@ -1,5 +1,6 @@
-import cv2
 from logging import getLogger
+
+import cv2
 import numpy as np
 
 log = getLogger(__name__)
@@ -33,8 +34,8 @@ def get_rot_params(angle, shape):
 
     # Declare the corners of the image in relation to the center
     corners = [
-        [-width_half,  height_half],
-        [width_half,  height_half],
+        [-width_half, height_half],
+        [width_half, height_half],
         [-width_half, -height_half],
         [width_half, -height_half]
     ]
@@ -78,16 +79,16 @@ def get_translation(shape_l, shape_r, homo_mat_l, homo_mat_r):
     w_r, h_r = shape_r
     log.debug('(h_l,w_l) = {}'.format(shape_l))
     corners_l = np.float32([
-        [0,     0],
-        [0,     w_l],
-        [h_l,   w_l],
-        [h_l,   0]
+        [0, 0],
+        [0, w_l],
+        [h_l, w_l],
+        [h_l, 0]
     ]).reshape(-1, 1, 2)
     corners_r = np.float32([
-        [0,     0],
-        [0,     w_r],
-        [h_r,   w_r],
-        [h_r,   0]
+        [0, 0],
+        [0, w_r],
+        [h_r, w_r],
+        [h_r, 0]
     ]).reshape(-1, 1, 2)
 
     # transform the corners of the images, to get the dimension of the
@@ -213,7 +214,7 @@ def argsort_pts(points):
        x       x                  D-------C
 
     """
-    assert(len(points) == 4)
+    assert (len(points) == 4)
 
     # calculate the barycentre / centre of gravity
     barycentre = np.zeros((1, 2), np.float32)
@@ -244,8 +245,9 @@ def argsort_pts(points):
     # between cloest point of origin (A) and barycentre
     for i, bary_vector in enumerate(bary_vectors):
         if i != A:
-            cur_angle = np.arctan2((np.linalg.det((bary_vectors[A], bary_vector))), np.dot(
-                bary_vectors[A], bary_vector))
+            cur_angle = np.arctan2(
+                (np.linalg.det((bary_vectors[A], bary_vector))), np.dot(
+                    bary_vectors[A], bary_vector))
             if cur_angle < 0:
                 cur_angle = 2 * np.pi + cur_angle
             angles[i] = cur_angle

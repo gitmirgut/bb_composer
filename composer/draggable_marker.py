@@ -1,5 +1,6 @@
-import cv2
 from logging import getLogger
+
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -110,7 +111,8 @@ class DraggableMarker(object):
         if not contains:
             return
         if event.key == 'b':
-            log.info('You pressed {}, the marker will be refined!'.format(event.key))
+            log.info(
+                'You pressed {}, the marker will be refined!'.format(event.key))
             xy = np.array([self.mark.get_xydata()[:]])
             log.debug('old coordinates = ' + str(xy))
             xy_new = refine(self.img, xy)

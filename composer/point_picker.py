@@ -1,7 +1,8 @@
+import matplotlib.pyplot as plt
+
+from composer import helpers
 from composer.draggable_marker import add_draggable_marker
 from composer.draggable_marker import dms_to_pts
-from composer import helpers
-import matplotlib.pyplot as plt
 
 
 class Point_Picker(object):
@@ -20,6 +21,7 @@ class Point_Picker(object):
         on the left and right image. Afterwards the PointPicker will return 2
         clockwise sorted list of the picked points.
         """
+
         def _on_click(event):
             if event.button == 1 and event.dblclick:
                 if event.inaxes == ax_left and len(dms_left) < 4:
@@ -42,7 +44,7 @@ class Point_Picker(object):
         # TODO c_id
         c_id = fig.canvas.mpl_connect('button_press_event', _on_click)
         plt.show()
-        assert((len(dms_left) == 4) and (len(dms_right) == 4))
+        assert ((len(dms_left) == 4) and (len(dms_right) == 4))
         quadri_left = helpers.sort_pts(dms_to_pts(dms_left))
         quadri_right = helpers.sort_pts(dms_to_pts(dms_right))
 

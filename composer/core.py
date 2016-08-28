@@ -1,10 +1,11 @@
 # TODO rename imgtools to imagetools and import as imgt
-import composer.helpers as helpers
-import composer.point_picker as point_picker
-from composer.point_picker import Point_Picker
-import cv2
 from logging import getLogger
+
+import cv2
 import numpy as np
+
+import composer.helpers as helpers
+from composer.point_picker import Point_Picker
 
 log = getLogger(__name__)
 
@@ -66,17 +67,17 @@ class Composer(object):
         log.debug(self)
 
     def __repr__(self):
-        return('{}(\nintrinsic=\n{}'
-               ',\ndist_coeff = {},'
-               '\nhomo_mat_l =\n{},'
-               '\nhomo_mat_r =\n{},'
-               '\nnew_cam_mat=\n{})'
-               .format(self.__class__.__name__,
-                       self.intr_mat,
-                       self.dstr_co,
-                       self.homo_mat_l,
-                       self.homo_mat_r,
-                       self.new_cam_mat))
+        return ('{}(\nintrinsic=\n{}'
+                ',\ndist_coeff = {},'
+                '\nhomo_mat_l =\n{},'
+                '\nhomo_mat_r =\n{},'
+                '\nnew_cam_mat=\n{})'
+                .format(self.__class__.__name__,
+                        self.intr_mat,
+                        self.dstr_co,
+                        self.homo_mat_l,
+                        self.homo_mat_r,
+                        self.new_cam_mat))
 
     def set_rectification_params(self, intr_mat, dstr_co, shape=(3000, 4000)):
         """Set & determine special args for rectification of imgs or points."""
@@ -99,7 +100,8 @@ class Composer(object):
         rect_imgs = []
         for img in images:
             rect_imgs.append(cv2.undistort(img, self.intr_mat,
-                                           self.dstr_co, None, self.new_cam_mat))
+                                           self.dstr_co, None,
+                                           self.new_cam_mat))
 
         # if just one argument is passed, return just the one rectified image
         if len(rect_imgs) == 1:
@@ -117,7 +119,8 @@ class Composer(object):
         return cv2.undistortPoints(
             points, self.intr_mat, self.dstr_co, None, self.new_cam_mat)
 
-    def set_rotation_parameters(self, angle_l=90, angle_r=-90, shape=(3000, 4000)):
+    def set_rotation_parameters(self, angle_l=90, angle_r=-90,
+                                shape=(3000, 4000)):
         """Determine special arguments for rotation of images and points."""
         self.rot_mat_l, self.rot_size_l = helpers.get_rot_params(
             angle_l, shape)
@@ -156,11 +159,13 @@ class Composer(object):
 
     def rotate_img_l(self, *images):
         """Rotate image with the arguments for the left image."""
-        return self.rotate_img(*images, rot_mat=self.rot_mat_l, rot_size=self.rot_size_l)
+        return self.rotate_img(*images, rot_mat=self.rot_mat_l,
+                               rot_size=self.rot_size_l)
 
     def rotate_img_r(self, *images):
         """Rotate image with the arguments for the right image."""
-        return self.rotate_img(*images, rot_mat=self.rot_mat_r, rot_size=self.rot_size_r)
+        return self.rotate_img(*images, rot_mat=self.rot_mat_r,
+                               rot_size=self.rot_size_r)
 
     def rotate_pts(self, pts, rot_mat=None):
         """Rotate points, by given rot_mat"""
@@ -204,7 +209,7 @@ class Composer(object):
 
         # unite
         result_r[:, :int(self.hor_l + self.trans_m[0][2])
-                 ] = result_l[:, :int(self.hor_l + self.trans_m[0][2])]
+        ] = result_l[:, :int(self.hor_l + self.trans_m[0][2])]
         return result_r
 
     def apply_homography(self, pts, homo=None):

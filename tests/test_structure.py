@@ -1,12 +1,12 @@
-from context import composer
-from composer.core import Composer
-import cv2
-import numpy as np
 import logging.config
 import os.path
 
-logging.config.fileConfig('logging_config.ini')
+import cv2
+import numpy as np
 
+from composer.core import Composer
+
+logging.config.fileConfig('logging_config.ini')
 
 camera_params_path = 'data/test_structure/Input/camera_params_matlab.npz'
 camera_params = np.load(camera_params_path)
