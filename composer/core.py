@@ -50,7 +50,7 @@ class Composer(object):
         """
         # checks if arguments list is empty
         if not images:
-            log.warning('No images rectified.')
+            log.warning('List of images for rectification is empty.')
             return None
 
         # rectify each image of images
@@ -64,6 +64,24 @@ class Composer(object):
             return rect_imgs[0]
 
         return rect_imgs
+
+    def rectify_points(self, *points):
+        """Rectifiy points.
+
+        Returns a list of rectified points, except if just one point as
+        argument is passed, then the return value is just an point.
+        """
+
+        if not points:
+            log.warning('List of points for rectification is empty.')
+            return None
+
+        rect_pts = []
+        for pt in points:
+            rect_pts.append(cv2.undistortPoints(pt, self.intr_mat, self.dstr_co, None, self.new_cam_mat))
+
+        return rect_pts
+
 
     def set_rotation_parameters(self, angle_l=90, angle_r=-90, shape=(3000, 4000)):
         """Determine special arguments for rotation of images and points."""
