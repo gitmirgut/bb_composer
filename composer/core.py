@@ -6,6 +6,7 @@ import numpy as np
 
 import composer.helpers as helpers
 from composer.point_picker import PointPicker
+from bb_binary import parse_image_fname
 
 log = getLogger(__name__)
 
@@ -18,6 +19,11 @@ class Composer(object):
         self.intr_mat = None
         self.dstr_co = None
         self.new_cam_mat = None
+
+        self.camIdx_l = None
+        self.camIdx_r = None
+        self.cam_dt_l = None
+        self.cam_dt_r = None
 
         self.rot_mat_l = None
         self.rot_mat_r = None
@@ -36,6 +42,10 @@ class Composer(object):
                  intr_mat=self.intr_mat,
                  dstr_co=self.dstr_co,
                  new_cam_mat=self.new_cam_mat,
+                 camIdx_l=self.camIdx_l,
+                 camIdx_r=self.camIdx_r,
+                 cam_dt_l=self.cam_dt_l,
+                 cam_dt_r=self.cam_dt_r,
                  rot_mat_l=self.rot_mat_l,
                  rot_mat_r=self.rot_mat_r,
                  rot_size_l=self.rot_size_l,
@@ -54,6 +64,10 @@ class Composer(object):
             self.intr_mat = data['intr_mat']
             self.dstr_co = data['dstr_co']
             self.new_cam_mat = data['new_cam_mat']
+            self.camIdx_l = data['camIdx_l']
+            self.camIdx_r = data['camIdx_r']
+            self.cam_dt_l = data['cam_dt_l']
+            self.cam_dt_r = data['cam_dt_r']
             self.rot_mat_l = data['rot_mat_l']
             self.rot_mat_r = data['rot_mat_r']
             self.rot_size_l = tuple(data['rot_size_l'])
@@ -63,6 +77,7 @@ class Composer(object):
             self.homo_mat_r = data['homo_mat_r']
             self.total_size = tuple(data['total_size'])
             self.trans_m = data['trans_m']
+
         log.info('Composer arguments loaded from file {}'.format(path))
         log.debug(self)
 
@@ -78,6 +93,10 @@ class Composer(object):
                         self.homo_mat_l,
                         self.homo_mat_r,
                         self.new_cam_mat))
+
+    def set_meta_data(self, filename_img_l, filename_img_r):
+        self.camIdx_l, self.cam_dt_l = parse_image_fname(filename_img_l, 'beesbook')
+        self.camIdx_r, self.cam_dt_r = parse_image_fname(filename_img_r, 'beesbook')
 
     def set_rectification_params(self, intr_mat, dstr_co, shape=(3000, 4000)):
         """Set & determine special args for rectification of imgs or points."""
@@ -234,12 +253,22 @@ class Composer(object):
         return self.couple_pano(img_l_ro, img_r_ro)
 
     def map_coordinate_left(self, pts):
-        """Maps unhandled points to handled"""
+        """Maps unhandled points to the panorma."""
         pts_re = self.rectify_points(pts)
         pts_ro = self.rotate_pts_l(pts_re)
         return self.apply_homography_l(pts_ro)
 
     def map_coordinate_right(self, pts):
+        """Maps unhandled points to the panorma."""
         pts_re = self.rectify_points(pts)
         pts_ro = self.rotate_pts_r(pts_re)
         return self.apply_homography_r(pts_ro)
+
+    def map_coordinate(self, pts, camIdx):
+        if self.camIdx_l == camIdx:
+            return self.map_coordinate_left(pts)
+        elif self.camIdx_r == camIdx:
+            return self.map_coordinate_right(pts)
+        else:
+            # TODO exeption einfügen
+            return None

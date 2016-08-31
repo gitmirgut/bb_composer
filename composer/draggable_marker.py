@@ -21,7 +21,6 @@ class DraggableMarker(object):
         """Initialize a DraggableMarker, with the img for later refinement."""
         self.img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         self.mark = mark
-        # self.mark.set_color('y')
         self.press = None
         self.background = None
 
