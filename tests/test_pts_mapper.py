@@ -3,7 +3,6 @@ import os
 
 import cv2
 import numpy as np
-
 import composer.core
 
 # import sys
@@ -51,72 +50,7 @@ cv2.imwrite('./data/test_pts_mapper/Output/0_1.jpg', img_r_m)
 c = composer.core.Composer()
 c.load_arguments('./data/test_pts_mapper/Input/composer_data.npz')
 
-'''
-rectification
-'''
-#  images
-img_l_re, img_r_re = c.rectify_images(img_l_m, img_r_m)
-cv2.imwrite('./data/test_pts_mapper/Output/1_0.jpg', img_l_re)
-cv2.imwrite('./data/test_pts_mapper/Output/1_1.jpg', img_r_re)
-
-# points
-pts_left_re = c.rectify_points(pts_left)
-pts_right_re = c.rectify_points(pts_right)
-
-# marker
-img_l_re_m = draw_makers(img_l_re, pts_left_re)
-img_r_re_m = draw_makers(img_r_re, pts_right_re)
-cv2.imwrite('./data/test_pts_mapper/Output/2_0.jpg', img_l_re_m)
-cv2.imwrite('./data/test_pts_mapper/Output/2_1.jpg', img_r_re_m)
-'''
-Rotation
-'''
-#  images
-img_l_ro = c.rotate_img(img_l_re)
-img_r_ro = c.rotate_img_r(img_r_re)
-cv2.imwrite('./data/test_pts_mapper/Output/3_0.jpg', img_l_ro)
-cv2.imwrite('./data/test_pts_mapper/Output/3_1.jpg', img_r_ro)
-
-# points
-pts_left_ro = c.rotate_pts_l(pts_left_re)
-pts_right_ro = c.rotate_pts_r(pts_right_re)
-
-print(pts_left_re)
-print(pts_left_ro)
-
-# marker
-img_l_ro_m = draw_makers(img_l_ro, pts_left_ro)
-img_r_ro_m = draw_makers(img_r_ro, pts_right_ro)
-cv2.imwrite('./data/test_pts_mapper/Output/4_0.jpg', img_l_ro_m)
-cv2.imwrite('./data/test_pts_mapper/Output/4_1.jpg', img_r_ro_m)
-
-'''
-Homo
-'''
-#  images
-result = c.couple_pano(img_l_ro, img_r_ro)
-cv2.imwrite('./data/test_pts_mapper/Output/5.jpg', result)
-
-# points
-pts_left_ho = c.apply_homography_l(pts_left_ro)
-pts_right_ho = c.apply_homography_r(pts_right_ro)
-
-# marker
-result_m = draw_makers(result, pts_left_ho)
-result_m = draw_makers(result_m, pts_right_ho)
-cv2.imwrite('./data/test_pts_mapper/Output/6.jpg', result_m)
-# cv2.imwrite('./data/pts_rect/4_1.jpg', img_r_ro_m)
-
-'''
-All in One
-'''
-# image
-unit = c.compose(img_l_m, img_r_m)
-cv2.imwrite('./data/test_pts_mapper/Output/7.jpg', unit)
-#  points
-pts_l = c.map_coordinate_left(pts_left_org)
 pts_r = c.map_coordinate_right(pts_right_org)
-# marker
-unit_m = draw_makers(unit, pts_l)
-unit_m = draw_makers(unit_m, pts_r)
-cv2.imwrite('./data/test_pts_mapper/Output/8.jpg', unit_m)
+
+res = c.compose_and_mark(img_left_org, img_right_org, pts_r)
+cv2.imwrite('./data/test_pts_mapper/Output/result.jpg', res)
