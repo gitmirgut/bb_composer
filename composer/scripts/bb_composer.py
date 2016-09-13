@@ -4,22 +4,25 @@ import numpy as np
 
 from composer.core import Composer
 
-# composer = Composer()
-# img_left_org = cv2.imread(
-#     '../20160807/Cam_01/Cam_0_20161507130847_631282517.jpg')
-# img_right_org = cv2.imread(
-#     '../20160807/Cam_01/Cam_1_20161507130847_631282517.jpg')
-# print(img_left_org.shape)
-# camera_params_path = 'camera_params_matlab.npz'
-# camera_params = np.load(camera_params_path)
-# composer.set_camera_params(camera_params)
-# test = composer.compose(img_left_org, img_right_org)
-# cv2.imwrite("result.png", test)
-
 
 def main():
     parser = argparse.ArgumentParser(
         prog='BeesBook composer',
         description='Determine the Parameter for the Coupling of two images.')
 
-    
+    parser.add_argument(
+        'left_img_path', help='path of the left image', type=str)
+    parser.add_argument(
+        'right_img_path', help='path of the right image', type=str)
+    parser.add_argument(
+        'cam_params_path', help='path of the file which holds'
+        ' the camera parameters', type=str)
+    parser.add_argument(
+        'composing_params_out', help='path of the output file, which will hold'
+        ' the coupling parameters'
+    )
+    args = parser.parse_args()
+
+
+if __name__ == '__main__':
+    main()
