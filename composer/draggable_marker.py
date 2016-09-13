@@ -118,7 +118,7 @@ class DraggableMarker(object):
             log.debug('new coordinates = ' + str(xy_new))
             self.mark.set_xdata(xy_new[0][0][0])
             self.mark.set_ydata(xy_new[0][0][1])
-            self.mark.set_color('y')
+            self.mark.set_color('g')
             plt.show()
 
     def disconnect(self):
@@ -142,7 +142,7 @@ def add_draggable_marker(event, axis, dms, img):
     """Add a DraggableMarker to the axis and to the list dms."""
     log.info('Create draggable Marker.')
     log.debug('x = ' + str(event.xdata) + ' | y = ' + str(event.xdata))
-    marker, = axis.plot(event.xdata, event.ydata, 'xr', markersize=20)
+    marker, = axis.plot(event.xdata, event.ydata, 'xr', markersize=20, markeredgewidth=2)
 
     # initialize draggable marker that is initialized with a Marker but
     # will move its x,y location when dragged
