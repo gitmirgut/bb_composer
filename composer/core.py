@@ -95,6 +95,7 @@ class Composer(object):
                         self.new_cam_mat))
 
     def set_meta_data(self, filename_img_l, filename_img_r):
+        """Set the meta data of the homography path."""
         self.camIdx_l, self.cam_dt_l = parse_image_fname(filename_img_l, 'beesbook')
         self.camIdx_r, self.cam_dt_r = parse_image_fname(filename_img_r, 'beesbook')
 

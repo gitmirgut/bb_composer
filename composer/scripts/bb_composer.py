@@ -22,6 +22,7 @@ def main():
         ' the coupling parameters'
     )
     args = parser.parse_args()
+    process_images(args)
 
 
 if __name__ == '__main__':
