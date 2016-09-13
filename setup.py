@@ -6,12 +6,19 @@ setup(
 
     description='Composing images from different cam positions',
     long_description='',
+    entry_points={
+        'console_scripts': [
+            'bb_composer = composer.scripts.bb_composer:main'
+        ]
+    },
 
     url='https://github.com/gitmirgut/bb_composer',
 
     author='gitmirgut',
     author_email="gitmirgut@users.noreply.github.com",
-    packages=['composer'],
+    packages=[
+        'composer',
+        'composer.scripts'],
 
     license='GNU GPLv3',
 
