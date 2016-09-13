@@ -1,8 +1,8 @@
 import argparse
-import cv2
-import numpy as np
-
 from composer.core import Composer
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def process_images(args):
@@ -21,7 +21,8 @@ def process_images(args):
     c.set_couple_parameters(left_rot, right_rot)
     result = c.couple_pano(left_rot, right_rot)
     c.save_arguments(args.composing_params_out)
-    cv2.imwrite('result.jpg', result)
+    plt.imshow(result)
+    plt.show()
 
 
 def main():
