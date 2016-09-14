@@ -1,13 +1,15 @@
 # bb_composer
+
+
  https://gitmirgut.github.io/bb_composer
 
 # 1. Parameter des Composers bestimmen
 
- Zuerst müssen die Parameter für den Composer bestimmt werden, die erszeugte Datei enthält dann alle benötigten Informationen um Punkte und Bilder, welche unter der gleichen Kamerakonfiguration erstellt wurden, auf ein Koordinatensystem abbzubilden.
+ Zuerst müssen die Parameter für den Composer bestimmt werden, die erzeugte Datei enthält dann alle benötigten Informationen um Punkte und Bilder, welche unter der gleichen Kamerakonfiguration erstellt wurden, auf ein gemeinsames Koordinatensystem abbzubilden.
 
  Struktur:
  ```bash
- $ bb_composer left_img right_img camera_params out_composer_params
+ $ bb_composer <left_img> <right_img> <camera_params> <out_composer_params>
  ```
 
  konkretes Bsp.:
@@ -22,10 +24,12 @@ Es wird dann nachfolgend ein Fenster mit den rektifizierten Bildern erzeugt.
 Auf beiden Seiten können dann jeweils 4 Punkte ausgwählt werden. Diese 4 Punkte
 sollten in den Weltkoordinaten des Bienestockes ein Rechteck bilden. (Die
 gesetzten Punkte können noch im Nachhinein verschoben werden). Befindet sich die
-Maus über einem Marker und wird die Taste '```b```' gedrückt wird die Markerpostion ver```b```essert, dies ist optisch durch eine grüne Farbe gekennzeichnet. Jeweils zwei der ausgewählten Punkte, welche im Überlappungsbereich der beiden Bilder liegen, sollten einander in Weltkoordinaten entsprechen.
+Maus über einem Marker und wird die Taste '```b```' gedrückt, wird die Markerpostion ver```b```essert, dies ist optisch durch eine grüne Farbe gekennzeichnet. Jeweils zwei der ausgewählten Punkte, welche im Überlappungsbereich der beiden Bilder liegen, sollten einander in Weltkoordinaten entsprechen. Sind alle Punkte gesetzt kann das Fenster geschlossen werden.
 
 ![png](pt_picker.png)
 
+Schlussendlich wird die Datei ```out_composer_params``` erzeugt und ein Preview-Bild eines Panorams der beiden verwendeten Bilder angezeigt.
+Die Datei ```out_composer_params``` kann dann nachfolgend in der Pipeline geladen werden und dient der Überführung der  ```Positions``` in ```HivePositions```
 
 # 2. Bestimmung der Koordinaten bzgl. des Gesamtbildes
 
