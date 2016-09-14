@@ -1,6 +1,7 @@
 # bb_composer
- https://gitmirgut.github.io/bb_composer/
- # 1. Parameter des Composers bestimmen
+ https://gitmirgut.github.io/bb_composer
+
+# 1. Parameter des Composers bestimmen
 
  Zuerst müssen die Parameter für den Composer bestimmt werden, die erszeugte Datei enthält dann alle benötigten Informationen um Punkte und Bilder, welche unter der gleichen Kamerakonfiguration erstellt wurden, auf ein Koordinatensystem abbzubilden.
 
@@ -26,7 +27,7 @@ Maus über einem Marker und wird die Taste '```b```' gedrückt wird die Markerpo
 ![png](pt_picker.png)
 
 
- # 2. Bestimmung der Koordinaten bzgl. des Gesamtbildes
+# 2. Bestimmung der Koordinaten bzgl. des Gesamtbildes
 
 
  ```python
@@ -115,7 +116,7 @@ Maus über einem Marker und wird die Taste '```b```' gedrückt wird die Markerpo
 
 
 
- # 3. bildliche Überprüfung
+# 3. bildliche Überprüfung
 
  Zusammenführung der Punkte aus dem linken sowie rechten Bild:
 
