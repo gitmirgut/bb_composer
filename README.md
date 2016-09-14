@@ -23,6 +23,9 @@ sollten in den Weltkoordinaten des Bienestockes ein Rechteck bilden. (Die
 gesetzten Punkte können noch im Nachhinein verschoben werden). Befindet sich die
 Maus über einem Marker und wird die Taste '```b```' gedrückt wird die Markerpostion ver```b```essert, dies ist optisch durch eine grüne Farbe gekennzeichnet. Jeweils zwei der ausgewählten Punkte, welche im Überlappungsbereich der beiden Bilder liegen, sollten einander in Weltkoordinaten entsprechen.
 
+![png](pt_picker.png)
+
+
  # 2. Bestimmung der Koordinaten bzgl. des Gesamtbildes
 
 
