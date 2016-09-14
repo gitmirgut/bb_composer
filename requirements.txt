@@ -1,0 +1,2 @@
+matplotlib
+git+https://github.com/BioroboticsLab/bb_binary.git#egg=bb_binary
